@@ -1,5 +1,5 @@
 import React from 'react';
-import SpendingDashboard from './components/SpendingDashboard';
+import SpendingDashboard from '@/app/components/SpendingDashboard';
 
 function App() {
   return (

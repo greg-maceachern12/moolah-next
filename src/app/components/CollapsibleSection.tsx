@@ -1,14 +1,8 @@
 'use client'
 import React, { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { CollapsibleSectionProps } from '@/lib/types'
 
-interface CollapsibleSectionProps {
-  title: string
-  children: React.ReactNode
-  defaultExpanded?: boolean
-  color?: string
-  icon?: React.ReactNode
-}
 
 export default function CollapsibleSection({
   title,

@@ -14,17 +14,7 @@ import {
   ExternalLink,
   FileSpreadsheet
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-
-interface FeatureCardProps {
-  icon: LucideIcon
-  title: string
-  description: string
-}
-
-interface EmptyStateProps {
-  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void
-}
+import { EmptyStateProps, FeatureCardProps } from '@/lib/types'
 
 const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description }) => (
   <motion.div 
@@ -280,7 +270,7 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
                       </li>
                       <li className="flex items-baseline space-x-2">
                         <span>3.</span>
-                        <span>Look for an "Export" or "Download" option</span>
+                        <span>Look for an Export or Download option</span>
                       </li>
                       <li className="flex items-baseline space-x-2">
                         <span>4.</span>

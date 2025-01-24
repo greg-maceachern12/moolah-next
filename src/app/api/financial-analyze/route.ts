@@ -1,11 +1,13 @@
 // app/api/financial-analyze/route.ts
-import { OpenAI } from 'openai'
-import { NextResponse } from 'next/server'
+import { OpenAI } from "openai";
+import { NextResponse } from "next/server";
+import { OpenAIError, Transaction} from '@/lib/types'
+
 
 // Initialize OpenAI outside the handler to reuse the instance
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-})
+});
 
 const systemPrompt = `
 Analyze the uploaded transaction data to generate 3-5 high-impact and difficult-to-discover financial insights. Focus on discovering significant patterns or suggestions that may not be immediately obvious.
@@ -31,96 +33,97 @@ Respond ONLY with the insights and a reccomendation, no commentary.
 - Ensure that the insights are actionable and based on accurate analysis.
 - Provide recommendations that are achievable and practical for implementation.
 - Maintain clarity and succinctness in both insights and recommendations.
-`
+`;
 
 export async function POST(req: Request) {
-  try {
-    // Get the request body
-    const body = await req.json()
-    const { transactions } = body
-    
-    if (!transactions) {
+    try {
+      const body = await req.json() as { transactions: Transaction[] };
+      const { transactions } = body;
+  
+      if (!transactions) {
+        return NextResponse.json(
+          { error: "No transaction data provided" },
+          { status: 400 }
+        );
+      }
+  
+      const transactionsString = JSON.stringify(transactions);
+      console.log("Processing transactions:", transactionsString);
+  
+      // Call OpenAI API
+      const chatResponse = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: transactionsString,
+              },
+            ],
+          },
+        ],
+      });
+  
+      // Add null checks and provide default value
+      const chatReply = chatResponse.choices[0]?.message?.content?.trim() ?? '';
+      if (!chatReply) {
+        throw new Error('No response content from OpenAI');
+      }
+  
+      console.log("AI Response:", chatReply);
+  
+      // Return successful response
       return NextResponse.json(
-        { error: 'No transaction data provided' },
-        { status: 400 }
-      )
-    }
-
-    const transactionsString = JSON.stringify(transactions)
-    console.log('Processing transactions:', transactionsString)
-
-    // Call OpenAI API
-    const chatResponse = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
+        { response: chatReply },
         {
-          role: "system",
-          content: systemPrompt,
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: transactionsString
-            }
-          ]
-        },
-      ],
-    })
-
-    const chatReply = chatResponse.choices[0].message.content.trim()
-    console.log('AI Response:', chatReply)
-
-    // Return successful response
-    return NextResponse.json(
-      { response: chatReply },
-      {
-        status: 200,
-        headers: {
-          'Access-Control-Allow-Methods': 'POST',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        },
-      }
-    )
-
-  } catch (error: any) {
-    console.error("Error in financial analysis:", error)
-    
-    let errorMessage = "An error occurred while analyzing the transactions."
-
-    if (error.response) {
-      // OpenAI API error response
-      errorMessage = `OpenAI API error: ${error.response.data.error.message}`
-    } else if (error.request) {
-      // No response received
-      errorMessage = "No response received from OpenAI API. Please try again later."
-    } else {
-      // Request setup error
-      errorMessage = `Error processing request: ${error.message}`
-    }
-
-    return NextResponse.json(
-      { error: errorMessage },
-      { 
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json'
+          status: 200,
+          headers: {
+            "Access-Control-Allow-Methods": "POST",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
         }
+      );
+    } catch (error: unknown) {
+      console.error("Error in financial analysis:", error);
+  
+      let errorMessage = "An error occurred while analyzing the transactions.";
+      const err = error as OpenAIError;
+  
+      if (err.response) {
+        errorMessage = `OpenAI API error: ${err.response.data.error.message}`;
+      } else if (err.request) {
+        errorMessage = "No response received from OpenAI API. Please try again later.";
+      } else {
+        errorMessage = `Error processing request: ${err.message}`;
       }
-    )
+  
+      return NextResponse.json(
+        { error: errorMessage },
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
   }
-}
 
 // app/api/financial-analyze/route.ts - CORS options handler
-export async function OPTIONS(request: Request) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400",
     },
-  })
+  });
 }
