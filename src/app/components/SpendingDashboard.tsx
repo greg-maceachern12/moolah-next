@@ -13,8 +13,7 @@ import {
     ArrowUpDown,
     Plus,
     Sparkles,
-    FileText,
-    MessageCircle
+    FileText
 } from 'lucide-react'
 import Papa from 'papaparse'
 import {
