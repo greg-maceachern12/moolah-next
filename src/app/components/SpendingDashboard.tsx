@@ -766,7 +766,7 @@ export default function SpendingDashboard() {
                 )}
 
                 {/* Feedback Form */}
-                <div className="mt-8 flex justify-center">
+                {/* <div className="mt-8 flex justify-center">
                     <form
                         className="bg-white bg-opacity-50 backdrop-filter backdrop-blur-sm rounded-lg shadow-md p-4 flex items-center space-x-2 w-full max-w-md"
                         data-netlify="true"
@@ -788,7 +788,7 @@ export default function SpendingDashboard() {
                             Send
                         </button>
                     </form>
-                </div>
+                </div> */}
             </div>
         </div>
     )
