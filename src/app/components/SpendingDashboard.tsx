@@ -624,7 +624,7 @@ export default function SpendingDashboard() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                             {/* Monthly Spending Trend */}
                             <div className="bg-white p-4 rounded shadow">
-                                <h2 className="text-lg font-semibold mb-4">Monthly Spending Trend</h2>
+                                <h2 className="text-lg text-gray-600 font-semibold mb-4">Monthly Spending Trend</h2>
                                 <ResponsiveContainer width="100%" height={300}>
                                     <LineChart data={monthlySpending}>
                                         <CartesianGrid strokeDasharray="3 3" />
@@ -653,7 +653,7 @@ export default function SpendingDashboard() {
 
                             {/* Spending by Category */}
                             <div className="bg-white p-4 rounded shadow">
-                                <h2 className="text-lg font-semibold mb-4">Spending by Category</h2>
+                                <h2 className="text-lg text-gray-600 font-semibold mb-4">Spending by Category</h2>
                                 {hasCategoryData ? (
                                     <ResponsiveContainer width="100%" height={300}>
                                         <PieChart>
@@ -683,7 +683,7 @@ export default function SpendingDashboard() {
 
                             {/* Average Spending by Day of Week */}
                             <div className="bg-white p-4 rounded shadow">
-                                <h2 className="text-lg font-semibold mb-4">Avg Spending by Day of Week</h2>
+                                <h2 className="text-lg text-gray-600 font-semibold mb-4">Avg Spending by Day of Week</h2>
                                 <ResponsiveContainer width="100%" height={300}>
                                     <BarChart data={avgSpendingByDayOfWeek}>
                                         <CartesianGrid strokeDasharray="3 3" />
@@ -698,7 +698,7 @@ export default function SpendingDashboard() {
 
                             {/* Category Spending Trend */}
                             <div className="bg-white p-4 rounded shadow">
-                                <h2 className="text-lg font-semibold mb-4">Category Spending Trend</h2>
+                                <h2 className="text-lg text-gray-600 font-semibold mb-4">Category Spending Trend</h2>
                                 <ResponsiveContainer width="100%" height={300}>
                                     <BarChart data={categoryTrendData}>
                                         <CartesianGrid strokeDasharray="3 3" />
@@ -736,7 +736,7 @@ export default function SpendingDashboard() {
                         {/* Recurring Payments Table */}
                         <div className="bg-white p-4 rounded shadow">
                             <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-semibold">Recurring Monthly Payments</h2>
+                                <h2 className="text-lg text-gray-600 font-semibold">Recurring Monthly Payments</h2>
                                 <RefreshCw className="w-6 h-6 text-gray-500" />
                             </div>
                             <div className="overflow-x-auto">
