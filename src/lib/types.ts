@@ -108,9 +108,16 @@ export interface TotalMap {
   [key: string]: number
 }
 
-// Response Types
+// Financial Insight Types
+export interface FinancialInsight {
+  title: string;
+  category: 'spending_pattern' | 'savings_opportunity' | 'risk_alert' | 'behavioral_pattern' | 'optimization';
+  description: string;
+  recommendation: string;
+}
+
 export interface FinancialAnalysisResponse {
-  response: string
+  insights: FinancialInsight[];
 }
 
 export interface TransactionsRequestBody {

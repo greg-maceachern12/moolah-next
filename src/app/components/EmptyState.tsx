@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { 
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
   Shield,
   Upload,
   ChevronDown,
@@ -12,12 +12,16 @@ import {
   Sparkles,
   HelpCircle,
   ExternalLink,
-  FileSpreadsheet
-} from 'lucide-react'
-import { EmptyStateProps, FeatureCardProps } from '@/lib/types'
-
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, description }) => (
-  <motion.div 
+  FileSpreadsheet,
+} from "lucide-react";
+import { EmptyStateProps, FeatureCardProps } from "@/lib/types";
+import Payment from "./Payment";
+const FeatureCard: React.FC<FeatureCardProps> = ({
+  icon: Icon,
+  title,
+  description,
+}) => (
+  <motion.div
     whileHover={{ scale: 1.02 }}
     whileTap={{ scale: 0.98 }}
     className="bg-white bg-opacity-60 rounded-xl p-6 flex items-start space-x-4 
@@ -29,58 +33,66 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon: Icon, title, descriptio
     </div>
     <div>
       <h3 className="font-semibold text-gray-800">{title}</h3>
-      <p className="text-sm text-gray-600 mt-2 leading-relaxed">{description}</p>
+      <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+        {description}
+      </p>
     </div>
   </motion.div>
-)
+);
 
 export default function EmptyState({ onFileUpload }: EmptyStateProps) {
-  const [isDragging, setIsDragging] = useState(false)
-  const [activeSection, setActiveSection] = useState<'help' | null>(null)
+  const [isDragging, setIsDragging] = useState(false);
+  const [activeSection, setActiveSection] = useState<"help" | null>(null);
+  const [isPremium, setIsPremium] = useState(false);
+  console.log(isPremium);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }
+    e.preventDefault();
+    setIsDragging(false);
+  };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const files = e.dataTransfer.files
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
     if (files.length > 0) {
       const syntheticEvent = {
-        target: { files }
-      } as React.ChangeEvent<HTMLInputElement>
-      onFileUpload(syntheticEvent)
+        target: { files },
+      } as React.ChangeEvent<HTMLInputElement>;
+      onFileUpload(syntheticEvent);
     }
-  }
+  };
 
   const handleUploadClick = () => {
-    const uploadInput = document.getElementById('file-upload') as HTMLInputElement
+    const uploadInput = document.getElementById(
+      "file-upload"
+    ) as HTMLInputElement;
     if (uploadInput) {
-      uploadInput.click()
+      uploadInput.click();
     }
-  }
+  };
 
   const handleSampleDataClick = async () => {
     try {
-      const response = await fetch('/sample-transactions.csv')
-      const csvText = await response.text()
-      const file = new File([csvText], 'sample-transactions.csv', { type: 'text/csv' })
-      
-      const input = document.createElement('input')
-      input.type = 'file'
-      
-      const event = new Event('change', { bubbles: true })
-      Object.defineProperty(input, 'files', {
-        value: [file]
-      })
-      
+      const response = await fetch("/sample-transactions.csv");
+      const csvText = await response.text();
+      const file = new File([csvText], "sample-transactions.csv", {
+        type: "text/csv",
+      });
+
+      const input = document.createElement("input");
+      input.type = "file";
+
+      const event = new Event("change", { bubbles: true });
+      Object.defineProperty(input, "files", {
+        value: [file],
+      });
+
       const syntheticEvent = {
         ...event,
         target: input,
@@ -89,13 +101,13 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
         preventDefault: () => {},
         stopPropagation: () => {},
         nativeEvent: event,
-      } as unknown as React.ChangeEvent<HTMLInputElement>
-      
-      onFileUpload(syntheticEvent)
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+      onFileUpload(syntheticEvent);
     } catch (error) {
-      console.error('Error loading sample data:', error)
+      console.error("Error loading sample data:", error);
     }
-  }
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
@@ -110,7 +122,8 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
           Understand Your Spending Data
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Upload your bank transactions and get instant insights into your spending patterns
+          Upload your bank transactions and get instant insights into your
+          spending patterns
         </p>
       </motion.div>
 
@@ -128,13 +141,17 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
             onDrop={handleDrop}
             animate={{
               scale: isDragging ? 1.02 : 1,
-              borderColor: isDragging ? '#818CF8' : '#E5E7EB'
+              borderColor: isDragging ? "#818CF8" : "#E5E7EB",
             }}
             className={`
               flex flex-col items-center justify-center p-16
               bg-gradient-to-b from-white to-gray-50
               border-2 border rounded-2xl
-              ${isDragging ? 'border-indigo-400 bg-indigo-50' : 'border-gray-200'}
+              ${
+                isDragging
+                  ? "border-indigo-400 bg-indigo-50"
+                  : "border-gray-200"
+              }
               transition-all duration-200 cursor-pointer
               hover:border-indigo-200 hover:bg-indigo-50/30
             `}
@@ -155,6 +172,7 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
               onChange={onFileUpload}
               accept=".csv"
               multiple
+              aria-label="Upload CSV file"
             />
             <div className="flex flex-col items-center gap-3">
               <motion.button
@@ -179,11 +197,13 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
               </motion.button>
             </div>
           </motion.div>
-          
+
           {/* Privacy Badge */}
           <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
-            <div className="bg-green-50 border border-green-200 rounded-full py-2 px-4 
-              flex items-center space-x-2 shadow-sm">
+            <div
+              className="bg-green-50 border border-green-200 rounded-full py-2 px-4 
+              flex items-center space-x-2 shadow-sm"
+            >
               <Shield className="w-4 h-4 text-green-600 flex-shrink-0" />
               <p className="text-green-800 text-sm whitespace-nowrap">
                 Your data is processed locally*
@@ -191,6 +211,7 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
             </div>
           </div>
         </div>
+        <Payment onValidationSuccess={() => setIsPremium(true)} />
       </motion.div>
 
       {/* Feature Cards */}
@@ -229,9 +250,11 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
         transition={{ duration: 0.5, delay: 0.6 }}
         className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl overflow-hidden"
       >
-        <motion.div 
+        <motion.div
           className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/30 transition-colors duration-200"
-          onClick={() => setActiveSection(activeSection === 'help' ? null : 'help')}
+          onClick={() =>
+            setActiveSection(activeSection === "help" ? null : "help")
+          }
         >
           <div className="flex items-center space-x-3">
             <HelpCircle className="w-5 h-5 text-indigo-600" />
@@ -239,18 +262,18 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
               How to Get Started
             </h3>
           </div>
-          <ChevronDown 
+          <ChevronDown
             className={`w-5 h-5 text-gray-500 transform transition-transform duration-200 ${
-              activeSection === 'help' ? 'rotate-180' : ''
-            }`} 
+              activeSection === "help" ? "rotate-180" : ""
+            }`}
           />
         </motion.div>
 
         <AnimatePresence>
-          {activeSection === 'help' && (
+          {activeSection === "help" && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
+              animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="border-t border-indigo-100"
@@ -258,7 +281,9 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
               <div className="p-6 bg-white/40">
                 <div className="text-sm text-gray-600 space-y-6">
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-2">Download your transactions:</h4>
+                    <h4 className="font-medium text-gray-800 mb-2">
+                      Download your transactions:
+                    </h4>
                     <ol className="list-decimal list-inside space-y-2">
                       <li className="flex items-baseline space-x-2">
                         <span>1.</span>
@@ -282,11 +307,12 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
                       </li>
                     </ol>
                   </div>
-                  
+
                   <div className="bg-blue-50 rounded-lg p-4">
                     <p className="text-blue-800 flex items-center">
                       <ExternalLink className="w-4 h-4 mr-2 flex-shrink-0" />
-                      Supported banks: Chase, American Express, Capital One and more
+                      Supported banks: Chase, American Express, Capital One and
+                      more
                     </p>
                   </div>
                 </div>
@@ -296,5 +322,5 @@ export default function EmptyState({ onFileUpload }: EmptyStateProps) {
         </AnimatePresence>
       </motion.div>
     </div>
-  )
+  );
 }

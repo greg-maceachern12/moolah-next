@@ -1,119 +1,113 @@
 // app/api/financial-analyze/route.ts
 import { OpenAI } from "openai";
 import { NextResponse } from "next/server";
-import { OpenAIError, Transaction} from '@/lib/types'
+import { OpenAIError, Transaction } from '@/lib/types';
 
-
-// Initialize OpenAI outside the handler to reuse the instance
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 const systemPrompt = `
-Analyze the uploaded transaction data to generate 3-5 high-impact and difficult-to-discover financial insights. Focus on discovering significant patterns or suggestions that may not be immediately obvious.
+You are a financial analyst AI. Analyze the transaction data and provide actionable insights.
 
-# Steps
+Focus on:
+- Spending patterns and trends
+- Opportunities to save money
+- Financial habits and behaviors
+- Unusual or concerning transactions
+- Recommendations for financial improvement
 
-1. **Data Analysis**: Examine the uploaded transaction data thoroughly. Look for trends, outliers, and patterns that are not immediately evident.
-2. **Pattern Recognition**: Identify high-impact financial insights by recognizing patterns that could suggest opportunities for financial improvement or flagging areas of concern.
-3. **Insight Development**: Translate these patterns into meaningful insights that could have significant financial implications.
-4. **Recommendation Crafting**: Based on each insight, create actionable recommendations for improvement.
+Provide 3-5 meaningful insights that can help the user improve their financial situation.
 
-# Output Format
-Keep each insight concise, ideally 2-3 sentences.
-Use clear, jargon-free language.
-Respond ONLY with the insights and a reccomendation, no commentary.
-# Format example:
-
-**Behavioral Patterns**:  Frequent purchases from Tompkins Square Bagels, occurring nearly weekly, indicate a habitual preference
-    **Recommendation**: Consider a loyalty program or subscription service for potential savings and additional perks.
-    
-# Notes
-
-- Ensure that the insights are actionable and based on accurate analysis.
-- Provide recommendations that are achievable and practical for implementation.
-- Maintain clarity and succinctness in both insights and recommendations.
+Your response must follow this JSON structure exactly:
+{
+  "insights": [
+    {
+      "title": "Clear, concise title of the insight",
+      "category": "one of: spending_pattern, savings_opportunity, risk_alert, behavioral_pattern, optimization",
+      "description": "Detailed explanation of the insight",
+      "recommendation": "Specific action the user can take"
+    }
+  ]
+}
 `;
 
 export async function POST(req: Request) {
-    try {
-      const body = await req.json() as { transactions: Transaction[] };
-      const { transactions } = body;
-  
-      if (!transactions) {
-        return NextResponse.json(
-          { error: "No transaction data provided" },
-          { status: 400 }
-        );
-      }
-  
-      const transactionsString = JSON.stringify(transactions);
-      console.log("Processing transactions:", transactionsString);
-  
-      // Call OpenAI API
-      const chatResponse = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: transactionsString,
-              },
-            ],
-          },
-        ],
-      });
-  
-      // Add null checks and provide default value
-      const chatReply = chatResponse.choices[0]?.message?.content?.trim() ?? '';
-      if (!chatReply) {
-        throw new Error('No response content from OpenAI');
-      }
-  
-      console.log("AI Response:", chatReply);
-  
-      // Return successful response
+  try {
+    const body = await req.json() as { transactions: Transaction[] };
+    const { transactions } = body;
+
+    if (!transactions || transactions.length === 0) {
       return NextResponse.json(
-        { response: chatReply },
-        {
-          status: 200,
-          headers: {
-            "Access-Control-Allow-Methods": "POST",
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
-        }
-      );
-    } catch (error: unknown) {
-      console.error("Error in financial analysis:", error);
-  
-      let errorMessage = "An error occurred while analyzing the transactions.";
-      const err = error as OpenAIError;
-  
-      if (err.response) {
-        errorMessage = `OpenAI API error: ${err.response.data.error.message}`;
-      } else if (err.request) {
-        errorMessage = "No response received from OpenAI API. Please try again later.";
-      } else {
-        errorMessage = `Error processing request: ${err.message}`;
-      }
-  
-      return NextResponse.json(
-        { error: errorMessage },
-        {
-          status: 500,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { error: "No transaction data provided" },
+        { status: 400 }
       );
     }
+
+    // Find date range for context
+    const dates = transactions.map(t => new Date(t.date));
+    const startDate = new Date(Math.min(...dates.map(d => d.getTime()))).toISOString().split('T')[0];
+    const endDate = new Date(Math.max(...dates.map(d => d.getTime()))).toISOString().split('T')[0];
+
+    // Call OpenAI API with structured output
+    const chatResponse = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: JSON.stringify({
+            transactions,
+            date_range: { start_date: startDate, end_date: endDate }
+          })
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.5,
+    });
+
+    const chatReply = chatResponse.choices[0]?.message?.content;
+    if (!chatReply) {
+      throw new Error('No response content from OpenAI');
+    }
+
+    // Parse response and return
+    const parsedResponse = JSON.parse(chatReply);
+    return NextResponse.json(parsedResponse, {
+      status: 200,
+      headers: {
+        "Access-Control-Allow-Methods": "POST",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  } catch (error) {
+    console.error("Error in financial analysis:", error);
+
+    let errorMessage = "An error occurred while analyzing the transactions.";
+    const err = error as OpenAIError;
+
+    if (err.response) {
+      errorMessage = `OpenAI API error: ${err.response.data.error.message}`;
+    } else if (err.request) {
+      errorMessage = "No response received from OpenAI API. Please try again later.";
+    } else {
+      errorMessage = `Error processing request: ${err.message}`;
+    }
+
+    return NextResponse.json(
+      { error: errorMessage },
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   }
+}
 
 // app/api/financial-analyze/route.ts - CORS options handler
 export async function OPTIONS() {
