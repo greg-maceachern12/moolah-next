@@ -824,14 +824,14 @@ export default function SpendingDashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-4 sm:space-y-0">
             <div className="flex items-center">
               <h1 className="text-2xl sm:text-3xl font-bold text-indigo-800 flex items-center">
-                Moolah
-                <Image
+              <Image
                   src="/assets/icon.png"
                   alt="Moolah Logo"
                   width={40}
                   height={40}
                   className="ml-2"
                 />
+                Moolah
               </h1>
             </div>
           </div>

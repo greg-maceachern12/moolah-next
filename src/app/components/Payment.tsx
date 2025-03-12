@@ -26,10 +26,10 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
       return;
     }
 
-    // Check if user has active subscription
-    checkEmailSubscription(savedEmail)
-      .then(({ hasActiveSubscription }) => {
-        if (hasActiveSubscription) {
+    // Check if user has active purchase
+    checkEmailPurchase(savedEmail)
+      .then(({ hasActivePurchase }) => {
+        if (hasActivePurchase) {
           activatePremium(savedEmail);
         } else {
           setView("email");
@@ -45,24 +45,24 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
     onValidationSuccess(true);
   };
 
-  const checkEmailSubscription = async (email: string) => {
+  const checkEmailPurchase = async (email: string) => {
     try {
       const response = await polar.subscriptions.list({
         productId: "b5a08134-928a-4aa0-8644-fbbc4ea7dc5d"
       });
       
       const items = response.result?.items || [];
-      const activeSubscription = items.find(sub => 
+      const activePurchase = items.find(sub => 
         ["active", "trialing"].includes(sub.status) &&
         sub.customer.email === email &&
         sub.productId === "b5a08134-928a-4aa0-8644-fbbc4ea7dc5d"
       );
-      console.log(activeSubscription);
+      console.log(activePurchase);
       
-      return { hasActiveSubscription: !!activeSubscription };
+      return { hasActivePurchase: !!activePurchase };
     } catch (error) {
       console.error("Polar API error:", error);
-      throw new Error("Failed to verify subscription");
+      throw new Error("Failed to verify purchase");
     }
   };
 
@@ -77,14 +77,14 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
     setError(null);
 
     try {
-      const { hasActiveSubscription } = await checkEmailSubscription(email);
-      if (hasActiveSubscription) {
+      const { hasActivePurchase } = await checkEmailPurchase(email);
+      if (hasActivePurchase) {
         activatePremium(email);
       } else {
-        window.open("https://buy.polar.sh/polar_cl_a6XfVPZiw3LFRXUk2IEnHF5XsR00VO7Sj8gsN2YdgK6", "_blank");
+        window.open("https://buy.polar.sh/polar_cl_GV29UaSHnZ5REFaXNyIsH5dLTvpcV3ysUS7D529c4Le", "_blank");
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Subscription check failed");
+      setError(error instanceof Error ? error.message : "Purchase verification failed");
     } finally {
       setIsProcessing(false);
     }
@@ -92,52 +92,52 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
 
   if (view === "checking") {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-100 rounded-xl p-3 shadow-lg border border-indigo-100 flex items-center justify-center gap-2 transition-all duration-300 w-full max-w-5xl">
-        <RefreshCw className="w-4 h-4 animate-spin text-indigo-600" />
-        <p className="text-sm font-medium text-gray-700">Verifying your premium status...</p>
+      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-3 shadow-lg border border-emerald-300 flex items-center justify-center gap-2 transition-all duration-300 w-full max-w-5xl">
+        <RefreshCw className="w-4 h-4 animate-spin text-white" />
+        <p className="text-sm font-medium text-white">Verifying your premium status...</p>
       </div>
     );
   }
 
   if (view === "success") {
     return (
-      <div className="bg-gradient-to-br from-white to-gray-100 rounded-xl p-3 shadow-lg border border-green-100 transition-all duration-300 w-full max-w-5xl">
+      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-3 shadow-lg border border-emerald-400 transition-all duration-300 w-full max-w-5xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-green-100 rounded-full p-1.5">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+            <div className="bg-white/30 backdrop-blur-sm rounded-full p-1.5">
+              <CheckCircle className="w-4 h-4 text-white" />
             </div>
-            <h3 className="text-base font-semibold text-gray-800">Premium Activated</h3>
+            <h3 className="text-base font-semibold text-white">Premium Activated</h3>
           </div>
-          <p className="text-xs text-gray-600">Enjoy all premium features and priority support</p>
+          <p className="text-xs text-white/90">Enjoy all premium features for life</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-lg transition-all duration-300 w-full">
-      {/* Premium header - clean, light design */}
-      <div className="bg-gray-50 border-b border-gray-100 p-4">
+    <div className="bg-white rounded-xl overflow-hidden shadow-xl border border-emerald-100 transition-all duration-300 w-full">
+      {/* Premium header - gradient design */}
+      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-indigo-100 rounded-full p-1.5">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-1.5">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-base font-bold text-gray-800">Premium</h2>
+            <h2 className="text-base font-bold text-white">Premium</h2>
           </div>
           
           <div className="flex items-center gap-x-2">
-            <div className="flex items-center gap-1 text-gray-600 text-xs">
-              <CheckCircle className="w-2.5 h-2.5 text-indigo-500" />
+            <div className="flex items-center gap-1 text-white/90 text-xs bg-white/10 px-2 py-1 rounded-full">
+              <CheckCircle className="w-2.5 h-2.5 text-white" />
               <span>o3-mini</span>
             </div>
-            <div className="flex items-center gap-1 text-gray-600 text-xs">
-              <CheckCircle className="w-2.5 h-2.5 text-indigo-500" />
+            <div className="flex items-center gap-1 text-white/90 text-xs bg-white/10 px-2 py-1 rounded-full">
+              <CheckCircle className="w-2.5 h-2.5 text-white" />
               <span>Unlimited Uploads</span>
             </div>
-            <div className="flex items-center gap-1 text-gray-600 text-xs">
-              <CheckCircle className="w-2.5 h-2.5 text-indigo-500" />
+            <div className="flex items-center gap-1 text-white/90 text-xs bg-white/10 px-2 py-1 rounded-full">
+              <CheckCircle className="w-2.5 h-2.5 text-white" />
               <span>New features first</span>
             </div>
           </div>
@@ -145,7 +145,7 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
       </div>
 
       {/* Email form section */}
-      <div className="p-4">
+      <div className="p-6 bg-white">
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="email" className="text-xs font-medium text-gray-700 mb-1 block">
@@ -158,13 +158,13 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full py-2 px-3 pr-12 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full py-2 px-3 pr-12 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 disabled={isProcessing}
               />
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white transition-colors duration-200"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white transition-colors duration-200"
               >
                 {isProcessing ? (
                   <RefreshCw className="w-3 h-3 animate-spin" />
@@ -184,7 +184,7 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
           
           <div className="flex items-center gap-1.5 text-xs text-gray-500">
             <Lock className="w-2 h-2" />
-            <p>Subscription details securely verified</p>
+            <p>Purchase details securely verified</p>
           </div>
         </form>
       </div>
