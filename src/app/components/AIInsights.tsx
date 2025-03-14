@@ -123,7 +123,7 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
               </div>
               <div>
                 <p className="text-base font-semibold text-gray-100 mb-1">
-                  {isLoading ? 'Generating AI insights...' : 'Get AI-Powered Financial Insights from o3-mini'}
+                  {isLoading ? 'Generating AI insights...' : 'Get AI-Powered Financial Insights from OpenAI'}
                 </p>
                 <p className="text-sm text-gray-400">
                   {isLoading ? 'This may take a moment...' : 'Discover spending patterns and optimization opportunities'}
