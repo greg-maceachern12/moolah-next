@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, RefreshCw, AlertTriangle, TrendingUp, ArrowRight } from 'lucide-react';
+import { Sparkles, RefreshCw, AlertTriangle, TrendingUp } from 'lucide-react';
 import CollapsibleSection from './CollapsibleSection';
 import { Transaction, FinancialAnalysisResponse, FinancialInsight } from '@/lib/types';
 
