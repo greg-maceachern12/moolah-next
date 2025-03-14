@@ -45,7 +45,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyStateProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [activeSection, setActiveSection] = useState<"help" | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
+  // const [isPremium, setIsPremium] = useState(false);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -79,7 +79,7 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
   };
 
   const handlePremiumActivation = (active: boolean) => {
-    setIsPremium(active);
+    // setIsPremium(active);
     if (onPremiumActivation) {
       onPremiumActivation(active);
     }
