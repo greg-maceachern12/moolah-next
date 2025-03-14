@@ -34,8 +34,12 @@ Your response must follow this JSON structure exactly:
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json() as { transactions: Transaction[] };
-    const { transactions } = body;
+    const body = await req.json() as { 
+      transactions: Transaction[];
+      additionalNotes?: string;
+    };
+    
+    const { transactions, additionalNotes = "" } = body;
 
     if (!transactions || transactions.length === 0) {
       return NextResponse.json(
@@ -49,6 +53,21 @@ export async function POST(req: Request) {
     const startDate = new Date(Math.min(...dates.map(d => d.getTime()))).toISOString().split('T')[0];
     const endDate = new Date(Math.max(...dates.map(d => d.getTime()))).toISOString().split('T')[0];
 
+    // Create user content with additional thoughts if provided
+    let userContent = JSON.stringify({
+      transactions,
+      date_range: { start_date: startDate, end_date: endDate }
+    });
+    
+    if (additionalNotes.trim()) {
+      userContent = `
+        ${userContent}
+        
+        Please incorporate these additional notes from the user in your analysis:
+        "${additionalNotes.trim()}"
+      `;
+    }
+
     // Call OpenAI API with structured output
     const chatResponse = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -59,10 +78,7 @@ export async function POST(req: Request) {
         },
         {
           role: "user",
-          content: JSON.stringify({
-            transactions,
-            date_range: { start_date: startDate, end_date: endDate }
-          })
+          content: userContent
         }
       ],
       response_format: { type: "json_object" },

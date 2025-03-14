@@ -13,6 +13,7 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
   const [isLoading, setIsLoading] = useState(false);
   const [aiInsights, setAiInsights] = useState<FinancialAnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [additionalNotes, setadditionalNotes] = useState('');
 
   const handleAIInsightsClick = async () => {
     if (!isPremium) {
@@ -29,7 +30,10 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ transactions }),
+        body: JSON.stringify({ 
+          transactions,
+          additionalNotes: additionalNotes.trim() 
+        }),
       });
 
       if (!response.ok) {
@@ -101,48 +105,58 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-5">
       <CollapsibleSection
         title="AI Insights"
         defaultExpanded={true}
-        icon={<Sparkles className="w-4 h-4 text-[#f2923d]" />}
+        icon={<Sparkles className="w-4 h-4 text-[#f2923d] animate-pulse" />}
       >
         <div className="bg-slate-800/70 backdrop-filter backdrop-blur-sm rounded-lg border border-slate-700/50 overflow-hidden">
           {!aiInsights && !error ? (
-            <button
-              onClick={handleAIInsightsClick}
-              disabled={isLoading}
-              className="w-full flex flex-col items-center justify-center space-y-4 focus:outline-none focus:ring-2 focus:ring-[#f2923d] focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed p-8 hover:bg-slate-800/90 transition-colors"
-            >
-              <div className="bg-gradient-to-br from-[#f2923d]/20 to-[#287FAD]/20 p-4 rounded-full border border-[#f2923d]/30">
+            <div className="w-full flex flex-col items-center justify-center space-y-4 p-6">
+              <div className="bg-gradient-to-br from-[#f2923d]/20 to-[#287FAD]/20 p-4 rounded-full border border-[#f2923d]/30 animate-pulse">
                 {isLoading ? (
                   <RefreshCw className="w-8 h-8 text-[#f2923d] animate-spin" />
                 ) : (
                   <Sparkles className="w-8 h-8 text-[#f2923d]" />
                 )}
               </div>
-              <div>
+              <div className="text-center">
                 <p className="text-base font-semibold text-gray-100 mb-1">
-                  {isLoading ? 'Generating AI insights...' : 'Get AI-Powered Financial Insights from OpenAI'}
+                  {isLoading ? 'Generating AI insights...' : 'Get AI-Powered Financial Insights'}
                 </p>
                 <p className="text-sm text-gray-400">
                   {isLoading ? 'This may take a moment...' : 'Discover spending patterns and optimization opportunities'}
                 </p>
               </div>
+              
               {!isLoading && (
-                <div className="flex items-center text-[#f2923d] text-sm font-medium mt-2">
-                  <span>Click to analyze</span>
-                  <ArrowRight className="w-4 h-4 ml-1" />
+                <div className="w-full max-w-sm flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={additionalNotes}
+                    onChange={(e) => setadditionalNotes(e.target.value)}
+                    placeholder="Notes (optional)"
+                    className="flex-grow px-3 py-1.5 bg-transparent border-b border-slate-700 text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:border-[#f2923d]"
+                  />
+                  
+                  <button
+                    onClick={handleAIInsightsClick}
+                    disabled={isLoading}
+                    className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-[#f2923d] text-sm font-medium rounded transition-colors"
+                  >
+                    Analyze
+                  </button>
                 </div>
               )}
-            </button>
+            </div>
           ) : error ? (
-            <div className="p-5 text-sm">
+            <div className="p-4 text-sm">
               <div className="flex items-center gap-2 mb-2 text-red-400">
-                <AlertTriangle className="w-5 h-5" />
-                <span className="font-medium text-lg">Analysis Error</span>
+                <AlertTriangle className="w-4 h-4" />
+                <span className="font-medium">Analysis Error</span>
               </div>
-              <p className="text-gray-300 mb-4 bg-red-900/20 p-3 rounded-lg border border-red-800/30">
+              <p className="text-gray-300 mb-3 bg-red-900/20 p-2.5 rounded-lg border border-red-800/30">
                 {error}
               </p>
               <button 
@@ -156,7 +170,7 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
           ) : (
             <div className="divide-y divide-slate-700/50">
               {aiInsights?.insights?.map((insight, index) => (
-                <div key={index} className="px-5">
+                <div key={index} className="px-5 py-4">
                   {renderInsight(insight)}
                 </div>
               ))}
