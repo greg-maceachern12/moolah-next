@@ -92,7 +92,7 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
 
   if (view === "checking") {
     return (
-      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-3 shadow-lg border border-emerald-300 flex items-center justify-center gap-2 transition-all duration-300 w-full max-w-5xl">
+      <div className="bg-gradient-to-br from-[#f2923d] to-[#287FAD] rounded-xl p-3 shadow-lg border border-[#f2923d]/30 flex items-center justify-center gap-2 transition-all duration-300 w-full max-w-5xl">
         <RefreshCw className="w-4 h-4 animate-spin text-white" />
         <p className="text-sm font-medium text-white">Verifying your premium status...</p>
       </div>
@@ -101,7 +101,7 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
 
   if (view === "success") {
     return (
-      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-3 shadow-lg border border-emerald-400 transition-all duration-300 w-full max-w-5xl">
+      <div className="bg-gradient-to-br from-[#f2923d] to-[#287FAD] rounded-xl p-3 shadow-lg border border-[#f2923d]/40 transition-all duration-300 w-full max-w-5xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-white/30 backdrop-blur-sm rounded-full p-1.5">
@@ -116,9 +116,9 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
   }
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-xl border border-emerald-100 transition-all duration-300 w-full">
+    <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm rounded-xl overflow-hidden shadow-xl border border-slate-700/50 transition-all duration-300 w-full">
       {/* Premium header - gradient design */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4">
+      <div className="bg-gradient-to-r from-[#f2923d] to-[#287FAD] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-white/20 backdrop-blur-sm rounded-full p-1.5">
@@ -145,10 +145,10 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
       </div>
 
       {/* Email form section */}
-      <div className="p-6 bg-white">
+      <div className="p-6 bg-slate-800/90">
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="email" className="text-xs font-medium text-gray-700 mb-1 block">
+            <label htmlFor="email" className="text-xs font-medium text-gray-300 mb-1 block">
               Verify your premium email
             </label>
             <div className="relative">
@@ -158,13 +158,13 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full py-2 px-3 pr-12 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                className="w-full py-2 px-3 pr-12 bg-slate-700/80 border border-slate-600 rounded-lg text-gray-100 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#f2923d] focus:border-transparent transition-all"
                 disabled={isProcessing}
               />
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 rounded-lg text-white transition-colors duration-200"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-[#f2923d] hover:bg-[#e07e2d] rounded-lg text-white transition-colors duration-200"
               >
                 {isProcessing ? (
                   <RefreshCw className="w-3 h-3 animate-spin" />
@@ -176,13 +176,13 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
           </div>
 
           {error && (
-            <div className="px-2 py-1 text-xs rounded-lg bg-red-50 text-red-600 flex items-center gap-1.5 border border-red-100 mb-3">
+            <div className="px-2 py-1 text-xs rounded-lg bg-red-900/50 text-red-200 flex items-center gap-1.5 border border-red-700/50 mb-3">
               <XCircle className="w-3 h-3 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
           
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+          <div className="flex items-center gap-1.5 text-xs text-gray-400">
             <Lock className="w-2 h-2" />
             <p>Purchase details securely verified</p>
           </div>

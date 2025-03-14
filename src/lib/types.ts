@@ -58,6 +58,7 @@ export interface CategoryTrendItem {
 // Component Props
 export interface EmptyStateProps {
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onPremiumActivation?: (active: boolean) => void
 }
 
 export interface CollapsibleSectionProps {

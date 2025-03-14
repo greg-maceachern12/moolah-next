@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import SpendingDashboard from '@/app/components/SpendingDashboard'
+import App from '@/app/App'
 
 export const metadata: Metadata = {
   title: 'Moolah | Understand Your Spending',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main>
-      <SpendingDashboard />
+      <App />
     </main>
   )
 }

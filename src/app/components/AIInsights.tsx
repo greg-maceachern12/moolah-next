@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, RefreshCw, AlertTriangle, Plus } from 'lucide-react';
+import { Sparkles, RefreshCw, AlertTriangle, Plus, TrendingUp, ArrowRight } from 'lucide-react';
 import CollapsibleSection from './CollapsibleSection';
 import { Transaction, FinancialAnalysisResponse, FinancialInsight } from '@/lib/types';
 
@@ -49,37 +49,51 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'spending_pattern': return 'text-blue-600 bg-blue-100';
-      case 'savings_opportunity': return 'text-green-600 bg-green-100';
-      case 'risk_alert': return 'text-red-600 bg-red-100';
-      case 'behavioral_pattern': return 'text-yellow-600 bg-yellow-100';
-      case 'optimization': return 'text-purple-600 bg-purple-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'spending_pattern': return 'text-blue-300 bg-blue-900/30 border border-blue-700/30';
+      case 'savings_opportunity': return 'text-green-300 bg-green-900/30 border border-green-700/30';
+      case 'risk_alert': return 'text-red-300 bg-red-900/30 border border-red-700/30';
+      case 'behavioral_pattern': return 'text-yellow-300 bg-yellow-900/30 border border-yellow-700/30';
+      case 'optimization': return 'text-purple-300 bg-purple-900/30 border border-purple-700/30';
+      default: return 'text-gray-300 bg-gray-800/30 border border-gray-700/30';
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'spending_pattern': return <TrendingUp className="w-4 h-4 text-blue-400" />;
+      case 'savings_opportunity': return <Sparkles className="w-4 h-4 text-green-400" />;
+      case 'risk_alert': return <AlertTriangle className="w-4 h-4 text-red-400" />;
+      case 'behavioral_pattern': return <TrendingUp className="w-4 h-4 text-yellow-400" />;
+      case 'optimization': return <RefreshCw className="w-4 h-4 text-purple-400" />;
+      default: return <Sparkles className="w-4 h-4 text-gray-400" />;
     }
   };
 
   const renderInsight = (insight: FinancialInsight) => {
     return (
-      <div className="py-3 border-b border-gray-100 last:border-b-0">
-        <div className="flex items-start gap-2">
-          <div className="flex-shrink-0 mt-1">
-            <Sparkles className="w-4 h-4 text-yellow-500" />
+      <div className="py-4 border-b border-slate-700/50 last:border-b-0">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 mt-1 bg-slate-800 p-1.5 rounded-full">
+            {getCategoryIcon(insight.category)}
           </div>
           <div className="flex-grow">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="text-base font-medium text-gray-800">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <h4 className="text-base font-medium text-gray-100">
                 {insight.title}
               </h4>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-opacity-15 ${getCategoryColor(insight.category)} bg-${insight.category.split('_')[0]}-100`}>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(insight.category)}`}>
                 {insight.category.replace('_', ' ')}
               </span>
             </div>
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-gray-300 mb-3 leading-relaxed">
               {insight.description}
             </p>
-            <p className="text-xs text-gray-600">
-              <span className="font-medium">Tip:</span> {insight.recommendation}
-            </p>
+            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+              <p className="text-sm text-gray-300 flex items-start gap-2">
+                <span className="font-medium text-[#f2923d] flex-shrink-0">Tip:</span> 
+                <span>{insight.recommendation}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -91,48 +105,64 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
       <CollapsibleSection
         title="AI Insights"
         defaultExpanded={true}
-        icon={<Sparkles className="w-4 h-4 text-yellow-500" />}
+        icon={<Sparkles className="w-4 h-4 text-[#f2923d]" />}
       >
-        {!aiInsights && !error ? (
-          <button
-            onClick={handleAIInsightsClick}
-            disabled={isLoading}
-            className="w-full flex flex-col items-center justify-center space-y-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="bg-indigo-100 bg-opacity-50 p-2 rounded-full">
-              {isLoading ? (
-                <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin" />
-              ) : (
-                <Plus className="w-8 h-8 text-indigo-500" />
-              )}
-            </div>
-            <p className="text-base font-semibold text-indigo-600 animate-pulse">
-              {isLoading ? 'Generating AI insights...' : 'Click to see AI insights'}
-            </p>
-          </button>
-        ) : error ? (
-          <div className="p-3 text-sm text-red-600">
-            <div className="flex items-center mb-1">
-              <AlertTriangle className="w-4 h-4 mr-2" />
-              <span className="font-medium">Error:</span>
-            </div>
-            <p>{error}</p>
-            <button 
+        <div className="bg-slate-800/70 backdrop-filter backdrop-blur-sm rounded-lg border border-slate-700/50 overflow-hidden">
+          {!aiInsights && !error ? (
+            <button
               onClick={handleAIInsightsClick}
-              className="mt-2 text-indigo-600 hover:text-indigo-800"
+              disabled={isLoading}
+              className="w-full flex flex-col items-center justify-center space-y-4 focus:outline-none focus:ring-2 focus:ring-[#f2923d] focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed p-8 hover:bg-slate-800/90 transition-colors"
             >
-              Try again
-            </button>
-          </div>
-        ) : (
-          <div>
-            {aiInsights?.insights?.map((insight) => (
-              <div key={insight.title}>
-                {renderInsight(insight)}
+              <div className="bg-gradient-to-br from-[#f2923d]/20 to-[#287FAD]/20 p-4 rounded-full border border-[#f2923d]/30">
+                {isLoading ? (
+                  <RefreshCw className="w-8 h-8 text-[#f2923d] animate-spin" />
+                ) : (
+                  <Sparkles className="w-8 h-8 text-[#f2923d]" />
+                )}
               </div>
-            ))}
-          </div>
-        )}
+              <div>
+                <p className="text-base font-semibold text-gray-100 mb-1">
+                  {isLoading ? 'Generating AI insights...' : 'Get AI-Powered Financial Insights from o3-mini'}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {isLoading ? 'This may take a moment...' : 'Discover spending patterns and optimization opportunities'}
+                </p>
+              </div>
+              {!isLoading && (
+                <div className="flex items-center text-[#f2923d] text-sm font-medium mt-2">
+                  <span>Click to analyze</span>
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </div>
+              )}
+            </button>
+          ) : error ? (
+            <div className="p-5 text-sm">
+              <div className="flex items-center gap-2 mb-2 text-red-400">
+                <AlertTriangle className="w-5 h-5" />
+                <span className="font-medium text-lg">Analysis Error</span>
+              </div>
+              <p className="text-gray-300 mb-4 bg-red-900/20 p-3 rounded-lg border border-red-800/30">
+                {error}
+              </p>
+              <button 
+                onClick={handleAIInsightsClick}
+                className="flex items-center text-[#f2923d] hover:text-[#e07e2d] transition-colors font-medium"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try again
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-700/50">
+              {aiInsights?.insights?.map((insight, index) => (
+                <div key={index} className="px-5">
+                  {renderInsight(insight)}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </CollapsibleSection>
     </div>
   );
