@@ -6,9 +6,10 @@ import { Polar } from "@polar-sh/sdk";
 
 interface PaymentProps {
   onValidationSuccess: (success: boolean) => void;
+  onShowUpsell: () => void;
 }
 
-const Payment = ({ onValidationSuccess }: PaymentProps) => {
+const Payment = ({ onValidationSuccess, onShowUpsell }: PaymentProps) => {
   const [view, setView] = useState<"checking" | "success" | "email">("checking");
   const [email, setEmail] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -47,15 +48,14 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
 
   const checkEmailPurchase = async (email: string) => {
     try {
-      const response = await polar.subscriptions.list({
-        productId: "b5a08134-928a-4aa0-8644-fbbc4ea7dc5d"
+      const response = await polar.orders.list({
+        productId: "f44b493b-27f3-4c5f-a38c-a86f6885d19f"
       });
-      
+      console.log(response);
       const items = response.result?.items || [];
       const activePurchase = items.find(sub => 
-        ["active", "trialing"].includes(sub.status) &&
         sub.customer.email === email &&
-        sub.productId === "b5a08134-928a-4aa0-8644-fbbc4ea7dc5d"
+        sub.productId === "f44b493b-27f3-4c5f-a38c-a86f6885d19f"
       );
       console.log(activePurchase);
       
@@ -81,7 +81,8 @@ const Payment = ({ onValidationSuccess }: PaymentProps) => {
       if (hasActivePurchase) {
         activatePremium(email);
       } else {
-        window.open("https://buy.polar.sh/polar_cl_GV29UaSHnZ5REFaXNyIsH5dLTvpcV3ysUS7D529c4Le", "_blank");
+        onShowUpsell();
+        localStorage.setItem("polar_subscriber_email", email);
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Purchase verification failed");

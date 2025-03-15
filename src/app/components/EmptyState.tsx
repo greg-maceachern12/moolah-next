@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { EmptyStateProps, FeatureCardProps } from "@/lib/types";
 import Payment from "./Payment";
+import UpsellDialog from "./UpsellDialog";
 
 const FeatureCard: React.FC<FeatureCardProps> = ({
   icon: Icon,
@@ -45,6 +46,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyStateProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [activeSection, setActiveSection] = useState<"help" | null>(null);
+  const [showUpsellDialog, setShowUpsellDialog] = useState(false);
   // const [isPremium, setIsPremium] = useState(false);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -233,7 +235,10 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
                 </div>
               </div>
             </div>
-            <Payment onValidationSuccess={handlePremiumActivation} />
+            <Payment 
+              onValidationSuccess={handlePremiumActivation} 
+              onShowUpsell={() => setShowUpsellDialog(true)} 
+            />
           </motion.div>
 
           {/* Feature Cards */}
@@ -345,6 +350,10 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
           </motion.div>
         </div>
       </div>
+      <UpsellDialog 
+        isOpen={showUpsellDialog}
+        onClose={() => setShowUpsellDialog(false)}
+      />
     </div>
   );
 }
