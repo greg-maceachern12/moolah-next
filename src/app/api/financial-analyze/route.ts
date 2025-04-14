@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
     // Call OpenAI API with structured output
     const chatResponse = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-mini",
       messages: [
         {
           role: "system",
