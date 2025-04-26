@@ -19,24 +19,39 @@ import { EmptyStateProps, FeatureCardProps } from "@/lib/types";
 import Payment from "./Payment";
 import UpsellDialog from "./UpsellDialog";
 
+// OpenAI-inspired colors (adjust as needed)
+const colors = {
+  background: "bg-gray-50", // Light gray background
+  textPrimary: "text-gray-900",
+  textSecondary: "text-gray-600",
+  accent: "text-blue-600",
+  accentBg: "bg-blue-600",
+  accentBgLight: "bg-blue-100",
+  border: "border-gray-200",
+  cardBg: "bg-white",
+  iconColor: "text-blue-600",
+  buttonText: "text-white",
+  buttonHoverBg: "bg-blue-700",
+  secondaryButtonBg: "bg-gray-100",
+  secondaryButtonHoverBg: "bg-gray-200",
+  secondaryButtonText: "text-gray-700",
+};
+
 const FeatureCard: React.FC<FeatureCardProps> = ({
   icon: Icon,
   title,
   description,
 }) => (
   <motion.div
-    whileHover={{ scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
-    className="bg-slate-800/70 backdrop-filter backdrop-blur-sm rounded-xl p-6 flex items-start space-x-4 
-      shadow-sm border border-slate-700/50 hover:shadow-md hover:border-[#f2923d]/30 
-      hover:bg-slate-800/80 transition-all duration-300"
+    whileHover={{ y: -2 }} // Subtle lift on hover
+    className={`${colors.cardBg} rounded-lg p-6 flex items-start space-x-4 shadow-sm ${colors.border} border transition-transform duration-200`}
   >
-    <div className="rounded-lg bg-[#287FAD]/20 p-3 border border-[#287FAD]/20">
-      <Icon className="w-6 h-6 text-[#287FAD]" />
+    <div className={`${colors.accentBgLight} rounded-md p-3`}>
+      <Icon className={`w-5 h-5 ${colors.iconColor}`} />
     </div>
     <div>
-      <h3 className="font-semibold text-gray-100">{title}</h3>
-      <p className="text-sm text-gray-300 mt-2 leading-relaxed">
+      <h3 className={`font-semibold ${colors.textPrimary}`}>{title}</h3>
+      <p className={`text-sm ${colors.textSecondary} mt-1 leading-normal`}>
         {description}
       </p>
     </div>
@@ -120,31 +135,31 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
   };
 
   return (
-    <div className="min-h-screen w-full bg-[url('/assets/bg.png')] bg-cover bg-center bg-fixed bg-no-repeat">
-      <div className="w-full h-full min-h-screen backdrop-blur-2xl backdrop-filter backdrop-saturate-150 py-12 px-4 bg-black/50 relative z-10">
-        <div className="max-w-5xl mx-auto">
+    <div className={`min-h-screen w-full ${colors.background}`}>
+      <div className="w-full min-h-screen py-16 px-4">
+        <div className="max-w-4xl mx-auto">
           {/* Logo and Header Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
             <div className="flex items-center justify-center mb-4">
               <Image
                 src="/assets/icon.png"
                 alt="Moolah Logo"
-                width={60}
-                height={60}
+                width={48}
+                height={48}
               />
-              <h1 className="text-5xl font-bold text-[#287FAD] ml-3">
+              <h1 className={`text-4xl font-semibold ${colors.accent} ml-3`}>
                 Moolah
               </h1>
             </div>
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className={`text-3xl font-semibold ${colors.textPrimary} mb-3`}>
               Understand Your Spending Data
             </h2>
-            <p className="text-lg text-gray-200 max-w-2xl mx-auto">
+            <p className={`text-lg ${colors.textSecondary} max-w-xl mx-auto`}>
               Upload your bank transactions and get instant insights into your
               spending patterns
             </p>
@@ -155,7 +170,7 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid gap-6 mb-12"
+            className="grid gap-8 mb-16"
           >
             <div className="relative">
               <motion.div
@@ -163,30 +178,26 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 animate={{
-                  scale: isDragging ? 1.02 : 1,
-                  borderColor: isDragging ? "#f2923d" : "rgba(100, 116, 139, 0.5)",
+                  borderColor: isDragging ? colors.accent : colors.border,
+                  backgroundColor: isDragging ? colors.accentBgLight : colors.cardBg,
                 }}
                 className={`
-                  flex flex-col items-center justify-center p-16
-                  bg-slate-800/70 backdrop-filter backdrop-blur-sm
-                  border-2 rounded-2xl
-                  ${
-                    isDragging
-                      ? "border-[#f2923d] bg-[#f2923d]/10"
-                      : "border-slate-700/50 bg-slate-800/70"
-                  }
-                  transition-all duration-200 cursor-pointer
-                  hover:border-[#f2923d]/50 hover:bg-slate-800/80
-                  shadow-xl
+                  flex flex-col items-center justify-center p-12
+                  ${colors.cardBg}
+                  border-2 border-dashed rounded-xl
+                  ${colors.border}
+                  transition-colors duration-200 cursor-pointer
+                  hover:border-blue-400
+                  shadow-sm
                 `}
               >
-                <div className="bg-slate-900/80 rounded-full p-5 mb-6 border border-[#f2923d]/20">
-                  <Upload className="w-10 h-10 text-[#f2923d]" />
+                <div className={`${colors.accentBgLight} rounded-full p-4 mb-5`}>
+                  <Upload className={`w-8 h-8 ${colors.iconColor}`} />
                 </div>
-                <h2 className="text-2xl font-semibold text-gray-100 mb-3">
+                <h2 className={`text-xl font-medium ${colors.textPrimary} mb-2`}>
                   Drop your CSV file here
                 </h2>
-                <p className="text-gray-300 mb-6">
+                <p className={`${colors.textSecondary} mb-6`}>
                   or click to browse from your computer
                 </p>
                 <input
@@ -198,23 +209,23 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
                   multiple
                   aria-label="Upload CSV file"
                 />
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-center gap-4">
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, backgroundColor: colors.buttonHoverBg }}
                     whileTap={{ scale: 0.98 }}
-                    className="bg-gradient-to-r from-[#f2923d] to-[#e07e2d] text-white px-8 py-4 rounded-xl font-medium 
-                      hover:from-[#e07e2d] hover:to-[#d06e1d] focus:outline-none focus:ring-2 focus:ring-[#f2923d]/50 
-                      focus:ring-offset-2 transition-all duration-200 shadow-md"
+                    className={`${colors.accentBg} ${colors.buttonText} px-6 py-3 rounded-md font-medium
+                      focus:outline-none focus:ring-2 focus:ring-blue-500/50
+                      focus:ring-offset-2 transition-all duration-200 shadow-sm`}
                     onClick={handleUploadClick}
                   >
                     Select CSV File
                   </motion.button>
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, backgroundColor: colors.secondaryButtonHoverBg }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleSampleDataClick}
-                    className="text-gray-300 text-sm px-4 py-2 rounded-lg 
-                      flex items-center gap-2 hover:bg-slate-700/50 transition-colors duration-200 border border-transparent hover:border-slate-600"
+                    className={`${colors.secondaryButtonBg} ${colors.secondaryButtonText} text-sm px-4 py-2 rounded-md
+                      flex items-center gap-2 hover:${colors.secondaryButtonHoverBg} transition-colors duration-200 border ${colors.border} shadow-sm`}
                   >
                     <FileSpreadsheet className="w-4 h-4" />
                     Try with sample data
@@ -223,13 +234,13 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
               </motion.div>
 
               {/* Privacy Badge */}
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2">
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
                 <div
-                  className="bg-slate-900/80 backdrop-filter backdrop-blur-sm border border-[#D9A566]/30 rounded-full py-2 px-4 
-                  flex items-center space-x-2 shadow-sm"
+                  className={`${colors.cardBg} border ${colors.border} rounded-full py-1.5 px-3
+                  flex items-center space-x-1.5 shadow-sm`}
                 >
-                  <Shield className="w-4 h-4 text-[#D9A566] flex-shrink-0" />
-                  <p className="text-gray-300 text-sm whitespace-nowrap">
+                  <Shield className={`w-3.5 h-3.5 ${colors.textSecondary} flex-shrink-0`} />
+                  <p className={`${colors.textSecondary} text-xs whitespace-nowrap`}>
                     Your data is processed locally*
                   </p>
                 </div>
@@ -246,27 +257,27 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="grid md:grid-cols-2 gap-6 mb-12"
+            className="grid md:grid-cols-2 gap-5 mb-16"
           >
             <FeatureCard
               icon={PieChart}
               title="Visual Insights"
-              description="See your spending patterns through beautiful, interactive charts and graphs"
+              description="See spending patterns through interactive charts and graphs."
             />
             <FeatureCard
               icon={TrendingUp}
               title="Spending Trends"
-              description="Track how your spending evolves over time with detailed trend analysis"
+              description="Track how your spending evolves over time with trend analysis."
             />
             <FeatureCard
               icon={DollarSign}
               title="Category Analysis"
-              description="Understand exactly where your money goes with detailed category breakdowns"
+              description="Understand where your money goes with detailed category breakdowns."
             />
             <FeatureCard
               icon={Sparkles}
               title="AI Powered"
-              description="Get personalized insights and recommendations based on your spending habits"
+              description="Get personalized insights based on your spending habits."
             />
           </motion.div>
 
@@ -275,22 +286,22 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="bg-slate-800/70 backdrop-filter backdrop-blur-sm rounded-xl overflow-hidden shadow-md border border-slate-700/50"
+            className={`${colors.cardBg} rounded-lg overflow-hidden shadow-sm border ${colors.border}`}
           >
             <motion.div
-              className="flex items-center justify-between p-6 cursor-pointer hover:bg-slate-700/50 transition-colors duration-200"
+              className={`flex items-center justify-between p-5 cursor-pointer hover:${colors.secondaryButtonHoverBg} transition-colors duration-200`}
               onClick={() =>
                 setActiveSection(activeSection === "help" ? null : "help")
               }
             >
               <div className="flex items-center space-x-3">
-                <HelpCircle className="w-5 h-5 text-[#287FAD]" />
-                <h3 className="text-lg font-semibold text-gray-100">
+                <HelpCircle className={`w-5 h-5 ${colors.iconColor}`} />
+                <h3 className={`text-md font-medium ${colors.textPrimary}`}>
                   How to Get Started
                 </h3>
               </div>
               <ChevronDown
-                className={`w-5 h-5 text-gray-300 transform transition-transform duration-200 ${
+                className={`w-5 h-5 ${colors.textSecondary} transform transition-transform duration-200 ${
                   activeSection === "help" ? "rotate-180" : ""
                 }`}
               />
@@ -303,43 +314,27 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="border-t border-slate-700/50"
+                  className={`border-t ${colors.border}`}
                 >
-                  <div className="p-6 bg-slate-800/50">
-                    <div className="text-sm text-gray-300 space-y-6">
+                  <div className={`p-6 ${colors.background}`}>
+                    <div className={`text-sm ${colors.textSecondary} space-y-5`}>
                       <div>
-                        <h4 className="font-medium text-gray-100 mb-2">
+                        <h4 className={`font-medium ${colors.textPrimary} mb-2`}>
                           Download your transactions:
                         </h4>
-                        <ol className="list-decimal list-inside space-y-2">
-                          <li className="flex items-baseline space-x-2">
-                            <span>1.</span>
-                            <span>Log into your online banking</span>
-                          </li>
-                          <li className="flex items-baseline space-x-2">
-                            <span>2.</span>
-                            <span>Navigate to your account transactions</span>
-                          </li>
-                          <li className="flex items-baseline space-x-2">
-                            <span>3.</span>
-                            <span>Look for an Export or Download option</span>
-                          </li>
-                          <li className="flex items-baseline space-x-2">
-                            <span>4.</span>
-                            <span>Select CSV format and your date range</span>
-                          </li>
-                          <li className="flex items-baseline space-x-2">
-                            <span>5.</span>
-                            <span>Upload the downloaded file here</span>
-                          </li>
+                        <ol className="list-decimal list-outside space-y-1.5 ml-4">
+                          <li>Log into your online banking</li>
+                          <li>Navigate to your account transactions</li>
+                          <li>Look for an Export or Download option</li>
+                          <li>Select CSV format and your date range</li>
+                          <li>Upload the downloaded file here</li>
                         </ol>
                       </div>
 
-                      <div className="bg-slate-900/70 backdrop-filter backdrop-blur-sm rounded-lg p-4 border border-[#A13D63]/20">
-                        <p className="text-gray-200 flex items-center">
-                          <ExternalLink className="w-4 h-4 mr-2 flex-shrink-0 text-[#A13D63]" />
-                          Supported banks: Chase, American Express, Capital One and
-                          more
+                      <div className={`${colors.accentBgLight} rounded-md p-4 border border-blue-200`}>
+                        <p className={`${colors.textSecondary} flex items-center text-xs`}>
+                          <ExternalLink className={`w-3.5 h-3.5 mr-1.5 flex-shrink-0 ${colors.accent}`} />
+                          Supported banks: Chase, American Express, Capital One and more.
                         </p>
                       </div>
                     </div>

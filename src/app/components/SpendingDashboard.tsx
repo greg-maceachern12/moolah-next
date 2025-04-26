@@ -32,14 +32,41 @@ import UpsellDialog from "./UpsellDialog";
 import AIInsights from "./AIInsights";
 import { Transaction, CategoryTrendItem, RecurringPayment } from "@/lib/types";
 
-const COLORS = [
-  "#287FAD",  // Blue
-  "#f2923d",  // Orange
-  "#A13D63",  // Rich Burgundy/Maroon (replaced Purple)
-  "#D9A566",  // Soft Gold/Amber (replaced Sage Green)
-  "#287FAD",  // Blue (repeated)
-  "#f2923d",  // Orange (repeated)
-  "#A13D63",  // Rich Burgundy/Maroon (repeated)
+// Updated OpenAI-inspired colors for the light theme
+const colors = {
+  background: "bg-gray-50",
+  textPrimary: "text-gray-900",
+  textSecondary: "text-gray-600",
+  accent: "text-blue-600",
+  accentBg: "bg-blue-600",
+  accentBgLight: "bg-blue-100",
+  border: "border-gray-200",
+  cardBg: "bg-white",
+  iconColor: "text-blue-600", // Default icon color
+  iconColorSecondary: "text-gray-500",
+  buttonText: "text-white",
+  buttonHoverBg: "bg-blue-700",
+  secondaryButtonBg: "bg-gray-100",
+  secondaryButtonHoverBg: "bg-gray-200",
+  secondaryButtonText: "text-gray-700",
+  errorText: "text-red-600",
+  successText: "text-green-600",
+  tableHeaderBg: "bg-gray-100",
+  tableRowHoverBg: "hover:bg-gray-50",
+  tooltipBg: "bg-white", // White tooltip background
+  tooltipText: "text-gray-700",
+  gridStroke: "#E5E7EB", // Lighter grid stroke for charts
+};
+
+// Adjusted chart colors for light theme
+const CHART_COLORS = [
+  "#2563EB", // Blue 600
+  "#EA580C", // Orange 600
+  "#DC2626", // Red 600
+  "#CA8A04", // Yellow 600
+  "#6D28D9", // Purple 600
+  "#059669", // Green 600
+  "#DB2777", // Pink 600
 ];
 
 interface SpendingDashboardProps {
@@ -265,8 +292,8 @@ export default function SpendingDashboard({
       setHasCategoryData(hasCategoryData);
 
       if (hasCategoryData) {
-        const top5Categories = sortedCategories.slice(0, 4);
-        const otherCategories = sortedCategories.slice(4);
+        const top5Categories = sortedCategories.slice(0, 6); // Show more slices if needed
+        const otherCategories = sortedCategories.slice(6);
         const otherTotal = otherCategories.reduce(
           (sum, [, value]) => sum + value,
           0
@@ -359,228 +386,164 @@ export default function SpendingDashboard({
     })}`;
   };
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const dateLabel = (() => {
+        if (!label) return "";
+        // Attempt to format based on assumed input (e.g., 'YYYY-MM' or 'Day')
+        if (typeof label === 'string' && label.includes('-')) {
+          const [year, month] = label.split('-');
+          const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+          return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        }
+        return label; // Return label as is if format is unknown
+      })();
+
+      return (
+        <div className={`${colors.tooltipBg} p-3 shadow-lg rounded-md border ${colors.border} opacity-95`}>
+          <p className={`label ${colors.textPrimary} font-medium mb-1`}>{dateLabel}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={`item-${index}`} className={`intro ${colors.textSecondary} text-sm`} style={{ color: entry.color }}>
+              {`${entry.name}: ${formatDollarAmount(entry.value)}`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-950 via-slate-900 to-zinc-800 bg-opacity-95 bg-blend-overlay relative animate-fade-in duration-500">
-      <div className="absolute inset-0 bg-[radial-gradient(#3a3a3a_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.15] animate-fade-in"></div>
-      <div className="w-full h-full min-h-screen backdrop-blur-md backdrop-filter backdrop-saturate-150 py-12 px-6 bg-black/20 relative z-10">
+    <div className={`min-h-screen w-full ${colors.background} animate-fade-in duration-500`}>
+      <div className="w-full min-h-screen py-12 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-4 sm:space-y-0">
+          <div className="mb-10">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-3 sm:space-y-0">
               <div className="flex items-center">
                 <Image
                   src="/assets/icon.png"
                   alt="Moolah Logo"
-                  width={50}
-                  height={50}
+                  width={40}
+                  height={40}
                 />
-                <h1 className="text-3xl sm:text-4xl font-bold text-[#287FAD] ml-3">
-                  Moolah
+                <h1 className={`text-3xl sm:text-4xl font-semibold ${colors.accent} ml-2.5`}>
+                  Moolah Dashboard
                 </h1>
               </div>
             </div>
-            {fileCount > 0 && (
-              <div className="text-sm text-gray-200 flex items-center mt-2">
-                <FileText className="w-4 h-4 mr-2 text-[#f2923d]" />
-                <span>{fileCount} file(s) selected</span>
-              </div>
-            )}
-            {startDate && endDate && (
-              <div className="text-sm text-gray-200 flex items-center mt-2">
-                <Calendar className="w-4 h-4 mr-2 text-[#f2923d]" />
-                <span>
-                  From{" "}
-                  {startDate.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}{" "}
-                  to{" "}
-                  {endDate.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-            )}
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm ${colors.textSecondary}">
+              {fileCount > 0 && (
+                <div className="flex items-center">
+                  <FileText className={`w-4 h-4 mr-1.5 ${colors.iconColorSecondary}`} />
+                  <span>{fileCount} file(s) selected</span>
+                </div>
+              )}
+              {startDate && endDate && (
+                <div className="flex items-center">
+                  <Calendar className={`w-4 h-4 mr-1.5 ${colors.iconColorSecondary}`} />
+                  <span>
+                    {startDate.toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })} - 
+                    {endDate.toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-8 animate-fade-in">
-            {/* Key Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">
-                    Avg. Monthly Spend
-                  </h2>
-                  <Calendar className="w-6 h-6 text-[#287FAD]" />
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
+              {[ 
+                { title: "Avg. Monthly Spend", value: avgMonthlySpend, icon: Calendar, color: colors.accent },
+                { title: "Avg. Daily Spend", value: avgDailySpend, icon: Sun, color: 'text-orange-600' },
+                { title: "Total Spent", value: totalSpent, icon: TrendingDown, color: colors.errorText },
+                { title: "Total Income", value: totalIncome, icon: TrendingUp, color: colors.successText },
+              ].map(metric => (
+                <div key={metric.title} className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border}`}> 
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className={`text-sm font-medium ${colors.textSecondary}`}>{metric.title}</h2>
+                    <metric.icon className={`w-5 h-5 ${colors.iconColorSecondary}`} />
+                  </div>
+                  <p className={`text-2xl font-semibold ${metric.color}`}>{formatDollarAmount(metric.value)}</p>
                 </div>
-                <p className="text-3xl font-bold text-[#287FAD]">
-                  {formatDollarAmount(avgMonthlySpend)}
-                </p>
+              ))}
+              
+              <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className={`text-sm font-medium ${colors.textSecondary}`}>Top Merchant</h2>
+                  <ShoppingBag className={`w-5 h-5 ${colors.iconColorSecondary}`} />
+                </div>
+                <p className={`text-lg font-semibold ${colors.textPrimary} truncate`} title={topMerchant.name}>{topMerchant.name || '-'}</p>
+                <p className={`text-xl font-semibold ${colors.accent}`}>{formatDollarAmount(topMerchant.amount)}</p>
               </div>
 
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
+              <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border}`}>
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">
-                    Avg. Daily Spend
-                  </h2>
-                  <Sun className="w-6 h-6 text-[#f2923d]" />
+                  <h2 className={`text-sm font-medium ${colors.textSecondary}`}>Largest Transaction</h2>
+                  <DollarSign className={`w-5 h-5 ${colors.iconColorSecondary}`} />
                 </div>
-                <p className="text-3xl font-bold text-[#f2923d]">
-                  {formatDollarAmount(avgDailySpend)}
-                </p>
+                <p className={`text-lg font-semibold ${colors.textPrimary} truncate`} title={largestExpense.description}>{largestExpense.description || '-'}</p>
+                <p className={`text-xl font-semibold ${colors.errorText}`}>{formatDollarAmount(largestExpense.amount)}</p>
+                {largestExpense.date && <p className={`text-xs ${colors.textSecondary} mt-1`}>{new Date(largestExpense.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>}
               </div>
 
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
+              <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border} relative`}>
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">
-                    Top Merchant
+                  <h2 className={`text-sm font-medium ${colors.textSecondary}`}>
+                    {showYearOverYear ? "YoY Change" : "MoM Change"}
                   </h2>
-                  <ShoppingBag className="w-6 h-6 text-[#A13D63]" />
-                </div>
-                <p className="text-xl font-bold text-gray-100">
-                  {topMerchant.name}
-                </p>
-                <p className="text-2xl font-bold text-[#A13D63]">
-                  {formatDollarAmount(topMerchant.amount)}
-                </p>
-              </div>
-
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">
-                    Largest Transaction
-                  </h2>
-                  <DollarSign className="w-6 h-6 text-[#f2923d]" />
-                </div>
-                <p className="text-xl font-bold text-gray-100">
-                  {largestExpense.description}
-                </p>
-                <p className="text-2xl font-bold text-[#f2923d]">
-                  {formatDollarAmount(largestExpense.amount)}
-                </p>
-                <p className="text-sm text-gray-300">
-                  {new Date(largestExpense.date).toLocaleDateString()}
-                </p>
-              </div>
-
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50 relative">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">
-                    {showYearOverYear
-                      ? "Year-over-Year Change"
-                      : "Month-over-Month Change"}
-                  </h2>
-                  <ArrowUpDown className="w-6 h-6 text-[#287FAD]" />
+                  <ArrowUpDown className={`w-5 h-5 ${colors.iconColorSecondary}`} />
                 </div>
                 <p
-                  className={`text-3xl font-bold ${
-                    (showYearOverYear
-                      ? yearOverYearChange
-                      : monthOverMonthChange) >= 0
-                      ? "text-red-600"
-                      : "text-green-600"
+                  className={`text-2xl font-semibold ${
+                    (showYearOverYear ? yearOverYearChange : monthOverMonthChange) >= 0
+                      ? colors.errorText 
+                      : colors.successText 
                   }`}
                 >
-                  {(showYearOverYear
-                    ? yearOverYearChange
-                    : monthOverMonthChange
-                  ).toFixed(2)}
-                  %
+                  {(showYearOverYear ? yearOverYearChange : monthOverMonthChange).toFixed(1)}%
                 </p>
                 <button
                   onClick={toggleChangeMetric}
-                  className="absolute bottom-2 right-2 px-1.5 py-0.5 text-[10px] bg-white/70 text-gray-700 rounded hover:bg-white/90 transition-colors"
+                  className={`absolute bottom-3 right-3 px-2 py-0.5 text-[10px] ${colors.secondaryButtonBg} ${colors.secondaryButtonText} rounded border ${colors.border} hover:${colors.secondaryButtonHoverBg} transition-colors`}
                 >
-                  {showYearOverYear ? "MoM" : "YoY"}
+                  View {showYearOverYear ? "MoM" : "YoY"}
                 </button>
-              </div>
-
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">
-                    Total Spent
-                  </h2>
-                  <TrendingDown className="w-6 h-6 text-red-500" />
-                </div>
-                <p className="text-3xl font-bold text-red-600">
-                  {formatDollarAmount(totalSpent)}
-                </p>
-              </div>
-
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-100">
-                    Total Income
-                  </h2>
-                  <TrendingUp className="w-6 h-6 text-green-500" />
-                </div>
-                <p className="text-3xl font-bold text-green-600">
-                  {formatDollarAmount(totalIncome)}
-                </p>
               </div>
             </div>
 
-            {/* AI Insights Section */}
             <AIInsights 
               transactions={transactions}
               isPremium={isPremium}
               onShowUpsell={() => setShowUpsellDialog(true)}
             />
 
-            {/* Charts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Monthly Spending Trend */}
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <h2 className="text-lg text-gray-100 font-semibold mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border}`}> 
+                <h2 className={`text-base font-semibold ${colors.textPrimary} mb-4`}> 
                   Monthly Spending Trend
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlySpending}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <LineChart data={monthlySpending} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.gridStroke} />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(tick) => {
-                        const [year, month] = tick.split("-");
-                        const date = new Date(
-                          parseInt(year),
-                          parseInt(month) - 1,
-                          1
-                        );
-                        return date.toLocaleString("default", {
-                          month: "short",
-                          year: "2-digit",
-                        });
+                        const [year, month] = tick.split('-');
+                        return new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' });
                       }}
-                      stroke="#9CA3AF"
+                      stroke={colors.textSecondary}
+                      fontSize={12}
                     />
-                    <YAxis stroke="#9CA3AF" />
-                    <Tooltip
-                      formatter={(value) => formatDollarAmount(value as number)}
-                      labelFormatter={(label) => {
-                        const [year, month] = label.split("-");
-                        const date = new Date(
-                          parseInt(year),
-                          parseInt(month) - 1,
-                          1
-                        );
-                        return date.toLocaleString("default", {
-                          month: "long",
-                          year: "numeric",
-                        });
-                      }}
-                      contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '8px', border: 'none', color: '#F3F4F6' }}
-                    />
-                    <Legend />
-                    <Line type="monotone" dataKey="amount" stroke="#287FAD" strokeWidth={2} dot={{ fill: '#287FAD', r: 4 }} activeDot={{ r: 6 }} />
+                    <YAxis stroke={colors.textSecondary} fontSize={12} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Line type="monotone" dataKey="amount" name="Spending" stroke={CHART_COLORS[0]} strokeWidth={2} dot={{ fill: CHART_COLORS[0], r: 3 }} activeDot={{ r: 5 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Spending by Category */}
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <h2 className="text-lg text-gray-100 font-semibold mb-4">
+              <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border}`}> 
+                <h2 className={`text-base font-semibold ${colors.textPrimary} mb-4`}> 
                   Spending by Category
                 </h2>
                 {hasCategoryData ? (
@@ -591,103 +554,69 @@ export default function SpendingDashboard({
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        outerRadius={100}
+                        outerRadius={90}
                         fill="#8884d8"
                         dataKey="value"
-                        label={({ name, percent }) =>
-                          `${name} ${(percent * 100).toFixed(0)}%`
-                        }
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        fontSize={12}
                       >
                         {categoryBreakdown.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip
-                        formatter={(value) =>
-                          formatDollarAmount(value as number)
-                        }
-                        contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '8px', border: 'none', color: '#F3F4F6' }}
-                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend wrapperStyle={{ fontSize: '12px' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex items-center justify-center h-[300px] text-gray-700 bg-white/30 rounded-lg">
-                    Category data not available in CSV
+                  <div className={`flex items-center justify-center h-[300px] ${colors.textSecondary} ${colors.secondaryButtonBg} rounded-md border ${colors.border}`}> 
+                    Category data not available
                   </div>
                 )}
               </div>
 
-              {/* Average Spending by Day of Week */}
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <h2 className="text-lg text-gray-100 font-semibold mb-4">
-                  Avg Spending by Day of Week
+              <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border}`}> 
+                <h2 className={`text-base font-semibold ${colors.textPrimary} mb-4`}> 
+                  Avg Spending by Day
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={avgSpendingByDayOfWeek}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis dataKey="day" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
-                    <Tooltip
-                      formatter={(value) => formatDollarAmount(value as number)}
-                      contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '8px', border: 'none', color: '#F3F4F6' }}
-                    />
-                    <Legend />
-                    <Bar dataKey="amount" fill="#f2923d" radius={[4, 4, 0, 0]} />
+                  <BarChart data={avgSpendingByDayOfWeek} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.gridStroke} />
+                    <XAxis dataKey="day" stroke={colors.textSecondary} fontSize={12} />
+                    <YAxis stroke={colors.textSecondary} fontSize={12} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
+                    <Bar dataKey="amount" name="Avg Spending" fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              {/* Category Spending Trend */}
-              <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
-                <h2 className="text-lg text-gray-100 font-semibold mb-4">
+              <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border}`}> 
+                <h2 className={`text-base font-semibold ${colors.textPrimary} mb-4`}> 
                   Category Spending Trend
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={categoryTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <BarChart data={categoryTrendData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.gridStroke} />
                     <XAxis
                       dataKey="date"
                       tickFormatter={(tick) => {
-                        const [year, month] = tick.split("-");
-                        const date = new Date(
-                          parseInt(year),
-                          parseInt(month) - 1,
-                          1
-                        );
-                        return date.toLocaleString("default", {
-                          month: "short",
-                          year: "2-digit",
-                        });
+                         const [year, month] = tick.split('-');
+                         return new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' });
                       }}
-                      stroke="#9CA3AF"
+                      stroke={colors.textSecondary}
+                      fontSize={12}
                     />
-                    <YAxis stroke="#9CA3AF" />
-                    <Tooltip
-                      formatter={(value) => formatDollarAmount(value as number)}
-                      labelFormatter={(label) => {
-                        const [year, month] = label.split("-");
-                        const date = new Date(
-                          parseInt(year),
-                          parseInt(month) - 1,
-                          1
-                        );
-                        return date.toLocaleString("default", {
-                          month: "long",
-                          year: "numeric",
-                        });
-                      }}
-                      contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', borderRadius: '8px', border: 'none', color: '#F3F4F6' }}
-                    />
-                    <Legend />
+                    <YAxis stroke={colors.textSecondary} fontSize={12} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: '12px' }} />
                     {categoryBreakdown.map((category, index) => (
                       <Bar
                         key={category.name}
                         dataKey={category.name}
                         stackId="a"
-                        fill={COLORS[index % COLORS.length]}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                        radius={index === categoryBreakdown.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                       />
                     ))}
                   </BarChart>
@@ -695,50 +624,54 @@ export default function SpendingDashboard({
               </div>
             </div>
 
-            {/* Recurring Payments Table */}
-            <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm p-6 rounded-xl shadow-md border border-slate-700/50">
+            <div className={`${colors.cardBg} p-5 rounded-lg shadow-sm border ${colors.border} overflow-hidden`}> 
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg text-gray-100 font-semibold">
-                  Recurring Monthly Payments
+                <h2 className={`text-base font-semibold ${colors.textPrimary}`}> 
+                  Recurring Payments (Detected)
                 </h2>
-                <RefreshCw className="w-6 h-6 text-[#287FAD]" />
+                <RefreshCw className={`w-5 h-5 ${colors.iconColorSecondary}`} />
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-700">
-                  <thead className="bg-slate-900/50">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className={colors.tableHeaderBg}> 
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className={`px-4 py-3 text-left text-xs font-medium ${colors.textSecondary} uppercase tracking-wider`}> 
                         Description
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className={`px-4 py-3 text-left text-xs font-medium ${colors.textSecondary} uppercase tracking-wider`}> 
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className={`px-4 py-3 text-left text-xs font-medium ${colors.textSecondary} uppercase tracking-wider`}> 
                         Months Charged
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-slate-800/30 divide-y divide-gray-700">
-                    {recurringPayments.map((payment, index) => (
-                      <tr key={index} className="hover:bg-slate-700/50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <tbody className={`bg-white divide-y divide-gray-200`}>
+                    {recurringPayments.length > 0 ? recurringPayments.map((payment, index) => (
+                      <tr key={index} className={`${colors.tableRowHoverBg} transition-colors`}> 
+                        <td className={`px-4 py-3 whitespace-nowrap text-sm ${colors.textPrimary}`}> 
                           {payment.description}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-100 font-medium">
+                        <td className={`px-4 py-3 whitespace-nowrap text-sm ${colors.textPrimary} font-medium`}> 
                           {formatDollarAmount(payment.amount)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        <td className={`px-4 py-3 whitespace-nowrap text-sm ${colors.textSecondary}`}> 
                           {payment.months}
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan={3} className={`px-4 py-4 text-center text-sm ${colors.textSecondary}`}> 
+                          No recurring payments detected (requires 3+ months of data).
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
           
-          {/* Upsell Dialog - outside of conditional rendering */}
           <UpsellDialog 
             isOpen={showUpsellDialog}
             onClose={() => setShowUpsellDialog(false)}

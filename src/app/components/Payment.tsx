@@ -9,6 +9,31 @@ interface PaymentProps {
   onShowUpsell: () => void;
 }
 
+// OpenAI-inspired colors (consistent with other components)
+const colors = {
+  background: "bg-gray-50",
+  textPrimary: "text-gray-900",
+  textSecondary: "text-gray-600",
+  accent: "text-blue-600",
+  accentBg: "bg-blue-600",
+  accentBgLight: "bg-blue-100",
+  border: "border-gray-200",
+  cardBg: "bg-white",
+  iconColor: "text-blue-600",
+  buttonText: "text-white",
+  buttonHoverBg: "bg-blue-700",
+  secondaryButtonBg: "bg-gray-100",
+  secondaryButtonHoverBg: "bg-gray-200",
+  secondaryButtonText: "text-gray-700",
+  errorText: "text-red-600",
+  errorBgLight: "bg-red-50",
+  errorBorder: "border-red-200",
+  successText: "text-green-600",
+  successBgLight: "bg-green-50",
+  successBorder: "border-green-200",
+  inputBg: "bg-white", // Specific for inputs if different from cardBg
+};
+
 const Payment = ({ onValidationSuccess, onShowUpsell }: PaymentProps) => {
   const [view, setView] = useState<"checking" | "success" | "email">("checking");
   const [email, setEmail] = useState("");
@@ -49,15 +74,15 @@ const Payment = ({ onValidationSuccess, onShowUpsell }: PaymentProps) => {
   const checkEmailPurchase = async (email: string) => {
     try {
       const response = await polar.orders.list({
-        productId: "f44b493b-27f3-4c5f-a38c-a86f6885d19f"
+        productId: "f44b493b-27f3-4c5f-a38c-a86f6885d19f" // Ensure this product ID is correct
       });
-      console.log(response);
+      // console.log(response);
       const items = response.result?.items || [];
       const activePurchase = items.find(sub => 
         sub.customer.email === email &&
         sub.productId === "f44b493b-27f3-4c5f-a38c-a86f6885d19f"
       );
-      console.log(activePurchase);
+      // console.log(activePurchase);
       
       return { hasActivePurchase: !!activePurchase };
     } catch (error) {
@@ -81,8 +106,11 @@ const Payment = ({ onValidationSuccess, onShowUpsell }: PaymentProps) => {
       if (hasActivePurchase) {
         activatePremium(email);
       } else {
+        // If purchase not found, show upsell AND save email for potential future checks
         onShowUpsell();
         localStorage.setItem("polar_subscriber_email", email);
+        // Optionally reset view to 'email' or keep it as is depending on desired UX
+        // setView("email"); 
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Purchase verification failed");
@@ -91,101 +119,101 @@ const Payment = ({ onValidationSuccess, onShowUpsell }: PaymentProps) => {
     }
   };
 
+  // Restyled "Checking" state
   if (view === "checking") {
     return (
-      <div className="bg-gradient-to-br from-[#f2923d] to-[#287FAD] rounded-xl p-3 shadow-lg border border-[#f2923d]/30 flex items-center justify-center gap-2 transition-all duration-300 w-full max-w-5xl">
-        <RefreshCw className="w-4 h-4 animate-spin text-white" />
-        <p className="text-sm font-medium text-white">Verifying your premium status...</p>
+      <div className={`${colors.cardBg} rounded-lg p-4 shadow-sm border ${colors.border} flex items-center justify-center gap-2 w-full`}>
+        <RefreshCw className={`w-4 h-4 animate-spin ${colors.textSecondary}`} />
+        <p className={`text-sm font-medium ${colors.textSecondary}`}>Verifying premium status...</p>
       </div>
     );
   }
 
+  // Restyled "Success" state
   if (view === "success") {
     return (
-      <div className="bg-gradient-to-br from-[#f2923d] to-[#287FAD] rounded-xl p-3 shadow-lg border border-[#f2923d]/40 transition-all duration-300 w-full max-w-5xl">
+      <div className={`${colors.successBgLight} rounded-lg p-4 shadow-sm border ${colors.successBorder} w-full`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-white/30 backdrop-blur-sm rounded-full p-1.5">
-              <CheckCircle className="w-4 h-4 text-white" />
+            <div className={`${colors.successText} bg-white/50 rounded-full p-1`}> {/* Simple white bg circle */}
+              <CheckCircle className={`w-4 h-4 ${colors.successText}`} />
             </div>
-            <h3 className="text-base font-semibold text-white">Premium Activated</h3>
+            <h3 className={`text-base font-semibold ${colors.successText}`}>Premium Activated</h3>
           </div>
-          <p className="text-xs text-white/90">Enjoy all premium features for life</p>
+          <p className={`text-xs ${colors.successText} opacity-90`}>Enjoy all premium features</p>
         </div>
       </div>
     );
   }
 
+  // Restyled "Email" input state
   return (
-    <div className="bg-slate-800/80 backdrop-filter backdrop-blur-sm rounded-xl overflow-hidden shadow-xl border border-slate-700/50 transition-all duration-300 w-full">
-      {/* Premium header - gradient design */}
-      <div className="bg-gradient-to-r from-[#f2923d] to-[#287FAD] p-4">
+    <div className={`${colors.cardBg} rounded-lg overflow-hidden shadow-sm border ${colors.border} w-full`}>
+      {/* Simplified Premium header */}
+      <div className={`${colors.accentBgLight} p-4 border-b ${colors.border}`}> 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-white/20 backdrop-blur-sm rounded-full p-1.5">
-              <Sparkles className="w-4 h-4 text-white" />
+            <div className={`${colors.iconColor} ${colors.accentBgLight} rounded-md p-1.5 border border-blue-200`}> {/* Updated icon bg */}
+              <Sparkles className={`w-4 h-4 ${colors.iconColor}`} />
             </div>
-            <h2 className="text-base font-bold text-white">Premium</h2>
+            <h2 className={`text-base font-semibold ${colors.textPrimary}`}>Premium Features</h2>
           </div>
           
-          <div className="flex items-center gap-x-2">
-            <div className="flex items-center gap-1 text-white/90 text-xs bg-white/10 px-2 py-1 rounded-full">
-              <CheckCircle className="w-2.5 h-2.5 text-white" />
-              <span>o3-mini</span>
-            </div>
-            <div className="flex items-center gap-1 text-white/90 text-xs bg-white/10 px-2 py-1 rounded-full">
-              <CheckCircle className="w-2.5 h-2.5 text-white" />
-              <span>Unlimited Uploads</span>
-            </div>
-            <div className="flex items-center gap-1 text-white/90 text-xs bg-white/10 px-2 py-1 rounded-full">
-              <CheckCircle className="w-2.5 h-2.5 text-white" />
-              <span>New features first</span>
-            </div>
+          {/* Simplified feature tags */}
+          <div className="hidden sm:flex items-center gap-x-2">
+            {['AI Insights', 'Unlimited Uploads', 'Early Access'].map((feature) => (
+              <div key={feature} className={`flex items-center gap-1 ${colors.textSecondary} text-xs ${colors.secondaryButtonBg} px-2 py-1 rounded-full border ${colors.border}`}> 
+                <CheckCircle className="w-2.5 h-2.5 text-green-500" /> {/* Using green check for clarity */}
+                <span>{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Email form section */}
-      <div className="p-6 bg-slate-800/90">
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="email" className="text-xs font-medium text-gray-300 mb-1 block">
-              Verify your premium email
+      <div className="p-5"> {/* Adjusted padding */}
+        <form onSubmit={handleSubmit} className="space-y-3"> {/* Added space-y */}
+          <div> {/* Removed mb-3, handled by form space-y */}
+            <label htmlFor="email" className={`text-xs font-medium ${colors.textSecondary} mb-1 block`}>
+              Verify purchase or get premium
             </label>
-            <div className="relative">
+            <div className="relative flex items-center"> {/* Use flex for button alignment */}
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full py-2 px-3 pr-12 bg-slate-700/80 border border-slate-600 rounded-lg text-gray-100 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#f2923d] focus:border-transparent transition-all"
+                className={`flex-grow w-full py-2 px-3 ${colors.inputBg} border ${colors.border} rounded-l-md ${colors.textPrimary} text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm`} // Use rounded-l-md
                 disabled={isProcessing}
+                aria-label="Email address"
               />
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center bg-[#f2923d] hover:bg-[#e07e2d] rounded-lg text-white transition-colors duration-200"
+                className={`px-3 py-2 ${colors.accentBg} hover:${colors.buttonHoverBg} rounded-r-md ${colors.buttonText} transition-colors duration-200 flex items-center justify-center shadow-sm`} // Use rounded-r-md
+                style={{ height: '42px' }} // Match input height (approx based on py-2, text-sm)
               >
                 {isProcessing ? (
-                  <RefreshCw className="w-3 h-3 animate-spin" />
+                  <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
-                  <ArrowRight className="w-3 h-3" />
+                  <ArrowRight className="w-4 h-4" />
                 )}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="px-2 py-1 text-xs rounded-lg bg-red-900/50 text-red-200 flex items-center gap-1.5 border border-red-700/50 mb-3">
-              <XCircle className="w-3 h-3 flex-shrink-0" />
+            <div className={`px-3 py-2 text-xs rounded-md ${colors.errorBgLight} ${colors.errorText} flex items-center gap-1.5 border ${colors.errorBorder} shadow-sm`}> {/* Adjusted styling */}
+              <XCircle className="w-3.5 h-3.5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
           
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-            <Lock className="w-2 h-2" />
-            <p>Purchase details securely verified</p>
+          <div className={`flex items-center gap-1.5 text-xs ${colors.textSecondary}`}> 
+            <Lock className="w-3 h-3" /> {/* Slightly larger icon */}
+            <p>Purchase details securely verified via Polar.</p>
           </div>
         </form>
       </div>

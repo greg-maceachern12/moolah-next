@@ -9,6 +9,36 @@ interface AIInsightsProps {
   onShowUpsell: () => void;
 }
 
+// OpenAI-inspired colors (consistent with EmptyState)
+const colors = {
+  background: "bg-gray-50",
+  textPrimary: "text-gray-900",
+  textSecondary: "text-gray-600",
+  accent: "text-blue-600",
+  accentBg: "bg-blue-600",
+  accentBgLight: "bg-blue-100",
+  border: "border-gray-200",
+  cardBg: "bg-white",
+  iconColor: "text-blue-600",
+  buttonText: "text-white",
+  buttonHoverBg: "bg-blue-700",
+  secondaryButtonBg: "bg-gray-100",
+  secondaryButtonHoverBg: "bg-gray-200",
+  secondaryButtonText: "text-gray-700",
+  errorText: "text-red-600",
+  errorBgLight: "bg-red-50",
+  errorBorder: "border-red-200",
+  successText: "text-green-600",
+  successBgLight: "bg-green-50",
+  successBorder: "border-green-200",
+  warningText: "text-yellow-600",
+  warningBgLight: "bg-yellow-50",
+  warningBorder: "border-yellow-200",
+  infoText: "text-purple-600", // Using purple for 'optimization'
+  infoBgLight: "bg-purple-50",
+  infoBorder: "border-purple-200",
+};
+
 export default function AIInsights({ transactions, isPremium, onShowUpsell }: AIInsightsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [aiInsights, setAiInsights] = useState<FinancialAnalysisResponse | null>(null);
@@ -51,50 +81,56 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
     }
   };
 
-  const getCategoryColor = (category: string) => {
+  // Updated category styling for the light theme
+  const getCategoryStyle = (category: string): { text: string; bg: string; border: string } => {
     switch (category) {
-      case 'spending_pattern': return 'text-blue-300 bg-blue-900/30 border border-blue-700/30';
-      case 'savings_opportunity': return 'text-green-300 bg-green-900/30 border border-green-700/30';
-      case 'risk_alert': return 'text-red-300 bg-red-900/30 border border-red-700/30';
-      case 'behavioral_pattern': return 'text-yellow-300 bg-yellow-900/30 border border-yellow-700/30';
-      case 'optimization': return 'text-purple-300 bg-purple-900/30 border border-purple-700/30';
-      default: return 'text-gray-300 bg-gray-800/30 border border-gray-700/30';
+      case 'spending_pattern': return { text: colors.accent, bg: colors.accentBgLight, border: 'border-blue-200' };
+      case 'savings_opportunity': return { text: colors.successText, bg: colors.successBgLight, border: colors.successBorder };
+      case 'risk_alert': return { text: colors.errorText, bg: colors.errorBgLight, border: colors.errorBorder };
+      case 'behavioral_pattern': return { text: colors.warningText, bg: colors.warningBgLight, border: colors.warningBorder };
+      case 'optimization': return { text: colors.infoText, bg: colors.infoBgLight, border: colors.infoBorder };
+      default: return { text: colors.textSecondary, bg: colors.secondaryButtonBg, border: colors.border };
     }
   };
 
   const getCategoryIcon = (category: string) => {
+    const style = getCategoryStyle(category);
     switch (category) {
-      case 'spending_pattern': return <TrendingUp className="w-4 h-4 text-blue-400" />;
-      case 'savings_opportunity': return <Sparkles className="w-4 h-4 text-green-400" />;
-      case 'risk_alert': return <AlertTriangle className="w-4 h-4 text-red-400" />;
-      case 'behavioral_pattern': return <TrendingUp className="w-4 h-4 text-yellow-400" />;
-      case 'optimization': return <RefreshCw className="w-4 h-4 text-purple-400" />;
-      default: return <Sparkles className="w-4 h-4 text-gray-400" />;
+      case 'spending_pattern': return <TrendingUp className={`w-4 h-4 ${style.text}`} />;
+      case 'savings_opportunity': return <Sparkles className={`w-4 h-4 ${style.text}`} />;
+      case 'risk_alert': return <AlertTriangle className={`w-4 h-4 ${style.text}`} />;
+      case 'behavioral_pattern': return <TrendingUp className={`w-4 h-4 ${style.text}`} />;
+      case 'optimization': return <RefreshCw className={`w-4 h-4 ${style.text}`} />;
+      default: return <Sparkles className={`w-4 h-4 ${style.text}`} />;
     }
   };
 
   const renderInsight = (insight: FinancialInsight) => {
+    const categoryStyle = getCategoryStyle(insight.category);
     return (
-      <div className="py-4 border-b border-slate-700/50 last:border-b-0">
+      // Use card background for each insight item if CollapsibleSection doesn't provide one
+      // Or adjust padding/borders if CollapsibleSection provides the card background
+      <div className={`py-4 border-b ${colors.border} last:border-b-0`}> 
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 mt-1 bg-slate-800 p-1.5 rounded-full">
+          <div className={`flex-shrink-0 mt-0.5 ${categoryStyle.bg} p-1.5 rounded-md border ${categoryStyle.border}`}> 
             {getCategoryIcon(insight.category)}
           </div>
           <div className="flex-grow">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <h4 className="text-base font-medium text-gray-100">
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <h4 className={`text-base font-medium ${colors.textPrimary}`}>
                 {insight.title}
               </h4>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(insight.category)}`}>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${categoryStyle.bg} ${categoryStyle.text} border ${categoryStyle.border}`}>
                 {insight.category.replace('_', ' ')}
               </span>
             </div>
-            <p className="text-sm text-gray-300 mb-3 leading-relaxed">
+            <p className={`text-sm ${colors.textSecondary} mb-3 leading-normal`}>
               {insight.description}
             </p>
-            <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-              <p className="text-sm text-gray-300 flex items-start gap-2">
-                <span className="font-medium text-[#f2923d] flex-shrink-0">Tip:</span> 
+            {/* Restyled recommendation box */}
+            <div className={`${colors.secondaryButtonBg} rounded-md p-3 border ${colors.border}`}> 
+              <p className={`text-sm ${colors.textSecondary} flex items-start gap-2`}>
+                <span className={`font-medium ${colors.accent} flex-shrink-0`}>Tip:</span> 
                 <span>{insight.recommendation}</span>
               </p>
             </div>
@@ -105,45 +141,50 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
   };
 
   return (
-    <div className="mb-5">
+    <div className="mb-6"> {/* Adjusted margin */}
+      {/* Assume CollapsibleSection is updated or handles its own styling */}
       <CollapsibleSection
         title="AI Insights"
-        defaultExpanded={true}
-        icon={<Sparkles className="w-4 h-4 text-[#f2923d] animate-pulse" />}
+        defaultExpanded={true} 
+        // Pass theme colors or rely on CollapsibleSection's internal styling
+        icon={<Sparkles className={`w-4 h-4 ${colors.iconColor} ${isLoading ? 'animate-pulse' : ''}`} />} // Use theme icon color
       >
-        <div className="bg-slate-800/70 backdrop-filter backdrop-blur-sm rounded-lg border border-slate-700/50 overflow-hidden">
+        {/* Use card background and border for the content area */}
+        <div className={`${colors.cardBg} rounded-b-lg border ${colors.border} border-t-0 overflow-hidden`}> 
           {!aiInsights && !error ? (
-            <div className="w-full flex flex-col items-center justify-center space-y-4 p-6">
-              <div className="bg-gradient-to-br from-[#f2923d]/20 to-[#287FAD]/20 p-4 rounded-full border border-[#f2923d]/30 animate-pulse">
+            <div className="w-full flex flex-col items-center justify-center space-y-4 p-8"> {/* Adjusted padding */}
+              {/* Simplified loading/initial state indicator */}
+              <div className={`${colors.accentBgLight} p-4 rounded-full border border-blue-200 ${isLoading ? 'animate-pulse' : ''}`}>
                 {isLoading ? (
-                  <RefreshCw className="w-8 h-8 text-[#f2923d] animate-spin" />
+                  <RefreshCw className={`w-8 h-8 ${colors.iconColor} animate-spin`} />
                 ) : (
-                  <Sparkles className="w-8 h-8 text-[#f2923d]" />
+                  <Sparkles className={`w-8 h-8 ${colors.iconColor}`} />
                 )}
               </div>
               <div className="text-center">
-                <p className="text-base font-semibold text-gray-100 mb-1">
+                <p className={`text-base font-medium ${colors.textPrimary} mb-1`}>
                   {isLoading ? 'Generating AI insights...' : 'Get AI-Powered Financial Insights'}
                 </p>
-                <p className="text-sm text-gray-400">
-                  {isLoading ? 'This may take a moment...' : 'Discover spending patterns and optimization opportunities'}
+                <p className={`text-sm ${colors.textSecondary}`}>
+                  {isLoading ? 'This may take a moment...' : 'Discover spending patterns and opportunities'}
                 </p>
               </div>
               
               {!isLoading && (
-                <div className="w-full max-w-sm flex items-center gap-2">
+                <div className="w-full max-w-sm flex items-center gap-3 mt-4"> {/* Added margin-top */}
                   <input
                     type="text"
                     value={additionalNotes}
                     onChange={(e) => setadditionalNotes(e.target.value)}
-                    placeholder="Notes (optional)"
-                    className="flex-grow px-3 py-1.5 bg-transparent border-b border-slate-700 text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:border-[#f2923d]"
+                    placeholder="Add context (e.g., saving goal)" // Improved placeholder
+                    className={`flex-grow px-3 py-2 ${colors.cardBg} border ${colors.border} rounded-md text-sm ${colors.textPrimary} placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-sm`} // Restyled input
                   />
                   
+                  {/* Restyled button */}
                   <button
                     onClick={handleAIInsightsClick}
                     disabled={isLoading}
-                    className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-[#f2923d] text-sm font-medium rounded transition-colors"
+                    className={`px-4 py-2 ${colors.secondaryButtonBg} hover:${colors.secondaryButtonHoverBg} ${colors.secondaryButtonText} text-sm font-medium rounded-md transition-colors border ${colors.border} shadow-sm`} 
                   >
                     Analyze
                   </button>
@@ -151,26 +192,30 @@ export default function AIInsights({ transactions, isPremium, onShowUpsell }: AI
               )}
             </div>
           ) : error ? (
-            <div className="p-4 text-sm">
-              <div className="flex items-center gap-2 mb-2 text-red-400">
-                <AlertTriangle className="w-4 h-4" />
-                <span className="font-medium">Analysis Error</span>
+            <div className="p-5"> {/* Adjusted padding */}
+              <div className={`flex items-center gap-2 mb-2 ${colors.errorText}`}>
+                <AlertTriangle className="w-5 h-5" /> {/* Slightly larger icon */}
+                <span className="font-medium text-base">Analysis Error</span> {/* Adjusted text size */}
               </div>
-              <p className="text-gray-300 mb-3 bg-red-900/20 p-2.5 rounded-lg border border-red-800/30">
+              {/* Restyled error box */}
+              <p className={`text-sm ${colors.errorText} mb-3 ${colors.errorBgLight} p-3 rounded-md border ${colors.errorBorder}`}> 
                 {error}
               </p>
+              {/* Restyled retry button */}
               <button 
                 onClick={handleAIInsightsClick}
-                className="flex items-center text-[#f2923d] hover:text-[#e07e2d] transition-colors font-medium"
+                className={`flex items-center ${colors.accent} hover:text-blue-700 transition-colors font-medium text-sm`}
               >
-                <RefreshCw className="w-4 h-4 mr-2" />
+                <RefreshCw className="w-4 h-4 mr-1.5" />
                 Try again
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-slate-700/50">
+            // Apply padding inside the container if renderInsight doesn't handle it
+            <div className="divide-y divide-gray-200 px-5"> 
               {aiInsights?.insights?.map((insight, index) => (
-                <div key={index} className="px-5 py-4">
+                // Removed redundant key div wrapper
+                <div key={index}>
                   {renderInsight(insight)}
                 </div>
               ))}
