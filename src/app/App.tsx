@@ -6,170 +6,170 @@ import EmptyState from '@/app/components/EmptyState';
 import { Transaction } from '@/lib/types';
 import Papa from 'papaparse';
 
+interface CSVFieldMapping {
+  dateField: string;
+  descriptionField: string;
+  amountField?: string;
+  categoryField?: string;
+  transactionTypeField?: string;
+  debitField?: string;
+  creditField?: string;
+  hasDebitCreditPair: boolean;
+  debitIndicator?: string;
+}
+
+const detectCSVFields = (headers: string[]): CSVFieldMapping | null => {
+  const headerSet = new Set(headers.map((h) => h.toLowerCase().trim()));
+
+  // Create a mapping of potential field names
+  const dateFields = [
+    "date",
+    "transaction date",
+    "posting date",
+    "trans date",
+    "transaction_date",
+    "txn_date",
+    "post_date",
+    "posted date", 
+    "statement date",
+    "purchase date",
+  ];
+  const descriptionFields = [
+    "description",
+    "transaction description",
+    "merchant",
+    "payee",
+    "details",
+    "transaction_description",
+    "desc",
+    "name",
+    "transaction",
+    "memo",
+    "notes",
+    "reference",
+    "vendor",
+  ];
+  const amountFields = [
+    "amount",
+    "transaction amount",
+    "payment amount",
+    "debit",
+    "credit",
+    "transaction_amount",
+    "txn_amount",
+    "payment",
+    "withdrawals",
+    "deposits",
+    "debit amount",
+    "credit amount",
+    "deposit amount",
+    "withdrawal amount",
+    "charge amount",
+  ];
+  const categoryFields = [
+    "category",
+    "merchant category",
+    "type",
+    "category_name",
+    "merchant_category",
+    "transaction_category",
+    "expense category",
+    "spending category",
+    "transaction type",
+  ];
+  const transactionTypeFields = [
+    "transaction type",
+    "type",
+    "trans type",
+    "transaction_type",
+    "txn_type",
+    "trans_type",
+    "debit/credit",
+    "entry type",
+  ];
+  
+  // Special column pairs (sometimes amounts are split into debit/credit columns)
+  const debitColumns = [
+    "debit",
+    "withdrawal",
+    "withdrawals",
+    "debit amount",
+    "payment",
+    "charge",
+    "charges",
+    "expense",
+  ];
+  
+  const creditColumns = [
+    "credit",
+    "deposit",
+    "deposits",
+    "credit amount",
+    "refund",
+    "refunds",
+    "inflow",
+    "income",
+  ];
+
+  // Find matching fields
+  const findField = (possibleFields: string[]): string | undefined => {
+    return possibleFields.find((field) =>
+      headerSet.has(field.toLowerCase().trim())
+    );
+  };
+
+  const dateField = findField(dateFields);
+  const descriptionField = findField(descriptionFields);
+  let amountField = findField(amountFields);
+  const categoryField = findField(categoryFields);
+  const transactionTypeField = findField(transactionTypeFields);
+  
+  // Check for debit/credit column pairs
+  const debitField = findField(debitColumns);
+  const creditField = findField(creditColumns);
+  
+  let hasDebitCreditPair = false;
+  if (!amountField && debitField && creditField) {
+    // If we have both debit and credit columns but no single amount field
+    amountField = debitField; // Default to using debit column
+    hasDebitCreditPair = true;
+  }
+
+  if (!dateField || !descriptionField || (!amountField && !hasDebitCreditPair)) {
+    return null; // Can't process without these essential fields
+  }
+
+  // Find the original case-sensitive header names
+  const findOriginalHeader = (lowerCaseField: string): string => {
+    return (
+      headers.find((h) => h.toLowerCase().trim() === lowerCaseField) ||
+      lowerCaseField
+    );
+  };
+
+  return {
+    dateField: findOriginalHeader(dateField),
+    descriptionField: findOriginalHeader(descriptionField),
+    amountField: amountField ? findOriginalHeader(amountField) : undefined,
+    categoryField: categoryField
+      ? findOriginalHeader(categoryField)
+      : undefined,
+    transactionTypeField: transactionTypeField
+      ? findOriginalHeader(transactionTypeField)
+      : undefined,
+    debitField: debitField ? findOriginalHeader(debitField) : undefined,
+    creditField: creditField ? findOriginalHeader(creditField) : undefined,
+    hasDebitCreditPair,
+    debitIndicator: "Debit", // Default value, commonly used
+  };
+};
+
 function App() {
   const [processedTransactions, setProcessedTransactions] = useState<Transaction[]>([]);
   const [csvUploaded, setCsvUploaded] = useState(false);
   const [selectedFileCount, setSelectedFileCount] = useState(0);
   const [isPremium, setIsPremium] = useState(false);
   
-  interface CSVFieldMapping {
-    dateField: string;
-    descriptionField: string;
-    amountField?: string;
-    categoryField?: string;
-    transactionTypeField?: string;
-    debitField?: string;
-    creditField?: string;
-    hasDebitCreditPair: boolean;
-    debitIndicator?: string;
-  }
-
-  const detectCSVFields = (headers: string[]): CSVFieldMapping | null => {
-    const headerSet = new Set(headers.map((h) => h.toLowerCase().trim()));
-
-    // Create a mapping of potential field names
-    const dateFields = [
-      "date",
-      "transaction date",
-      "posting date",
-      "trans date",
-      "transaction_date",
-      "txn_date",
-      "post_date",
-      "posted date", 
-      "statement date",
-      "purchase date",
-    ];
-    const descriptionFields = [
-      "description",
-      "transaction description",
-      "merchant",
-      "payee",
-      "details",
-      "transaction_description",
-      "desc",
-      "name",
-      "transaction",
-      "memo",
-      "notes",
-      "reference",
-      "vendor",
-    ];
-    const amountFields = [
-      "amount",
-      "transaction amount",
-      "payment amount",
-      "debit",
-      "credit",
-      "transaction_amount",
-      "txn_amount",
-      "payment",
-      "withdrawals",
-      "deposits",
-      "debit amount",
-      "credit amount",
-      "deposit amount",
-      "withdrawal amount",
-      "charge amount",
-    ];
-    const categoryFields = [
-      "category",
-      "merchant category",
-      "type",
-      "category_name",
-      "merchant_category",
-      "transaction_category",
-      "expense category",
-      "spending category",
-      "transaction type",
-    ];
-    const transactionTypeFields = [
-      "transaction type",
-      "type",
-      "trans type",
-      "transaction_type",
-      "txn_type",
-      "trans_type",
-      "debit/credit",
-      "entry type",
-    ];
-    
-    // Special column pairs (sometimes amounts are split into debit/credit columns)
-    const debitColumns = [
-      "debit",
-      "withdrawal",
-      "withdrawals",
-      "debit amount",
-      "payment",
-      "charge",
-      "charges",
-      "expense",
-    ];
-    
-    const creditColumns = [
-      "credit",
-      "deposit",
-      "deposits",
-      "credit amount",
-      "refund",
-      "refunds",
-      "inflow",
-      "income",
-    ];
-
-    // Find matching fields
-    const findField = (possibleFields: string[]): string | undefined => {
-      return possibleFields.find((field) =>
-        headerSet.has(field.toLowerCase().trim())
-      );
-    };
-
-    const dateField = findField(dateFields);
-    const descriptionField = findField(descriptionFields);
-    let amountField = findField(amountFields);
-    const categoryField = findField(categoryFields);
-    const transactionTypeField = findField(transactionTypeFields);
-    
-    // Check for debit/credit column pairs
-    const debitField = findField(debitColumns);
-    const creditField = findField(creditColumns);
-    
-    let hasDebitCreditPair = false;
-    if (!amountField && debitField && creditField) {
-      // If we have both debit and credit columns but no single amount field
-      amountField = debitField; // Default to using debit column
-      hasDebitCreditPair = true;
-    }
-
-    if (!dateField || !descriptionField || (!amountField && !hasDebitCreditPair)) {
-      return null; // Can't process without these essential fields
-    }
-
-    // Find the original case-sensitive header names
-    const findOriginalHeader = (lowerCaseField: string): string => {
-      return (
-        headers.find((h) => h.toLowerCase().trim() === lowerCaseField) ||
-        lowerCaseField
-      );
-    };
-
-    return {
-      dateField: findOriginalHeader(dateField),
-      descriptionField: findOriginalHeader(descriptionField),
-      amountField: amountField ? findOriginalHeader(amountField) : undefined,
-      categoryField: categoryField
-        ? findOriginalHeader(categoryField)
-        : undefined,
-      transactionTypeField: transactionTypeField
-        ? findOriginalHeader(transactionTypeField)
-        : undefined,
-      debitField: debitField ? findOriginalHeader(debitField) : undefined,
-      creditField: creditField ? findOriginalHeader(creditField) : undefined,
-      hasDebitCreditPair,
-      debitIndicator: "Debit", // Default value, commonly used
-    };
-  };
-
   const processFiles = useCallback(
     async (files: File[]) => {
       // Helper function to parse dates in various formats

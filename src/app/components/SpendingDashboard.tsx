@@ -75,6 +75,18 @@ interface SpendingDashboardProps {
   isPremium: boolean;
 }
 
+interface TooltipPayload {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+  label?: string | number;
+}
+
 export default function SpendingDashboard({ 
   transactions, 
   fileCount, 
@@ -386,7 +398,7 @@ export default function SpendingDashboard({
     })}`;
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       const dateLabel = (() => {
         if (!label) return "";
@@ -402,7 +414,7 @@ export default function SpendingDashboard({
       return (
         <div className={`${colors.tooltipBg} p-3 shadow-lg rounded-md border ${colors.border} opacity-95`}>
           <p className={`label ${colors.textPrimary} font-medium mb-1`}>{dateLabel}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index) => (
             <p key={`item-${index}`} className={`intro ${colors.textSecondary} text-sm`} style={{ color: entry.color }}>
               {`${entry.name}: ${formatDollarAmount(entry.value)}`}
             </p>

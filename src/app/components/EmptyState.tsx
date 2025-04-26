@@ -37,17 +37,39 @@ const colors = {
   secondaryButtonText: "text-gray-700",
 };
 
-const FeatureCard: React.FC<FeatureCardProps> = ({
+// Added distinct background colors for feature cards
+const featureCardIconBgs = [
+  "bg-blue-100",
+  "bg-green-100",
+  "bg-yellow-100",
+  "bg-purple-100",
+];
+const featureCardIconColors = [
+  "text-blue-600",
+  "text-green-600",
+  "text-yellow-600",
+  "text-purple-600",
+];
+
+// Update FeatureCardProps to include iconBgClass and iconColorClass
+interface FeatureCardPropsExtended extends FeatureCardProps {
+  iconBgClass: string;
+  iconColorClass: string;
+}
+
+const FeatureCard: React.FC<FeatureCardPropsExtended> = ({
   icon: Icon,
   title,
   description,
+  iconBgClass,
+  iconColorClass,
 }) => (
   <motion.div
     whileHover={{ y: -2 }} // Subtle lift on hover
     className={`${colors.cardBg} rounded-lg p-6 flex items-start space-x-4 shadow-sm ${colors.border} border transition-transform duration-200`}
   >
-    <div className={`${colors.accentBgLight} rounded-md p-3`}>
-      <Icon className={`w-5 h-5 ${colors.iconColor}`} />
+    <div className={`${iconBgClass} rounded-md p-3`}>
+      <Icon className={`w-5 h-5 ${iconColorClass}`} />
     </div>
     <div>
       <h3 className={`font-semibold ${colors.textPrimary}`}>{title}</h3>
@@ -263,21 +285,29 @@ export default function EmptyState({ onFileUpload, onPremiumActivation }: EmptyS
               icon={PieChart}
               title="Visual Insights"
               description="See spending patterns through interactive charts and graphs."
+              iconBgClass={featureCardIconBgs[0]}
+              iconColorClass={featureCardIconColors[0]}
             />
             <FeatureCard
               icon={TrendingUp}
               title="Spending Trends"
               description="Track how your spending evolves over time with trend analysis."
+              iconBgClass={featureCardIconBgs[1]}
+              iconColorClass={featureCardIconColors[1]}
             />
             <FeatureCard
               icon={DollarSign}
               title="Category Analysis"
               description="Understand where your money goes with detailed category breakdowns."
+              iconBgClass={featureCardIconBgs[2]}
+              iconColorClass={featureCardIconColors[2]}
             />
             <FeatureCard
               icon={Sparkles}
               title="AI Powered"
               description="Get personalized insights based on your spending habits."
+              iconBgClass={featureCardIconBgs[3]}
+              iconColorClass={featureCardIconColors[3]}
             />
           </motion.div>
 
